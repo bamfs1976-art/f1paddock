@@ -32,7 +32,10 @@ export const handler: Handler = async (event) => {
   if (!limit.ok) {
     return {
       statusCode: 429,
-      headers: { 'Retry-After': String(limit.retryAfter || 30) },
+      headers: {
+        'Retry-After': String(limit.retryAfter || 30),
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ error: 'Rate limit exceeded' }),
     };
   }
