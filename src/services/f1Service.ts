@@ -1,7 +1,20 @@
 import type { LiveSyncState, WeatherData, TelemetryData, LapData, RaceControlMessage, PitStop } from '../types';
 import { DRIVER_NUMBER_MAP } from '../constants';
 
-const BASE = 'https://api.openf1.org/v1';
+// Use the Netlify Function proxy in production (server-side caches OpenF1 responses
+// for ~15s and serves stale data for up to 5min on upstream rate-limits). Falls back
+// to direct OpenF1 calls in pure dev (Vite without netlify dev) where the proxy 404s.
+const PROXY_BASE = '/.netlify/functions/openf1-proxy';
+const DIRECT_BASE = 'https://api.openf1.org/v1';
+let useDirect = false;
+
+function buildUrl(path: string, query: string): string {
+  if (useDirect) return `${DIRECT_BASE}/${path}${query ? `?${query}` : ''}`;
+  const params = new URLSearchParams({ path });
+  if (query) params.set('query', query);
+  return `${PROXY_BASE}?${params.toString()}`;
+}
+
 const SESSION_TTL = 10 * 60 * 1000; // re-check session every 10 minutes
 
 let cachedSessionKey: number | null = null;
@@ -12,10 +25,15 @@ let lastPositions: { driver_number: number; position: number }[] = [];
 let syncInFlight: Promise<LiveSyncState | null> | null = null;
 let backoffUntil = 0;
 
-async function safeFetch<T>(url: string): Promise<T | null> {
+async function safeFetchUrl<T>(url: string): Promise<T | null> {
   if (Date.now() < backoffUntil) return null;
   try {
     const res = await fetch(url);
+    if (res.status === 404 && !useDirect) {
+      // Proxy not deployed (e.g. Vite-only dev). Switch to direct OpenF1 for the rest of the session.
+      useDirect = true;
+      return null;
+    }
     if (res.status === 429) {
       backoffUntil = Date.now() + 120_000;
       return null;
@@ -25,6 +43,16 @@ async function safeFetch<T>(url: string): Promise<T | null> {
   } catch {
     return null;
   }
+}
+
+async function safeFetch<T>(path: string, query = ''): Promise<T | null> {
+  // Try proxy first; safeFetchUrl flips useDirect=true on 404 so we can retry direct.
+  const first = await safeFetchUrl<T>(buildUrl(path, query));
+  if (first !== null) return first;
+  if (useDirect) {
+    return safeFetchUrl<T>(buildUrl(path, query));
+  }
+  return null;
 }
 
 export function isRateLimited(): boolean {
@@ -40,7 +68,7 @@ async function refreshSession(force = false): Promise<OpenF1Session | null> {
   if (!force && cachedSessionKey && Date.now() - sessionLookupAt < SESSION_TTL) {
     return null;
   }
-  const sessions = await safeFetch<OpenF1Session[]>(`${BASE}/sessions?meeting_key=latest`);
+  const sessions = await safeFetch<OpenF1Session[]>('sessions', 'meeting_key=latest');
   if (!sessions || !sessions.length) return null;
   // Pick the session whose [date_start, date_end] contains "now", or the next upcoming, else the last one.
   const now = Date.now();
@@ -67,10 +95,10 @@ export async function getLatestSession() {
 async function fetchLatestWeather(): Promise<WeatherData | null> {
   // Prefer current session, then meeting (covers between-session windows).
   if (cachedSessionKey) {
-    const sessionWeather = await safeFetch<WeatherData[]>(`${BASE}/weather?session_key=${cachedSessionKey}`);
+    const sessionWeather = await safeFetch<WeatherData[]>('weather', `session_key=${cachedSessionKey}`);
     if (sessionWeather && sessionWeather.length) return sessionWeather[sessionWeather.length - 1];
   }
-  const meetingWeather = await safeFetch<WeatherData[]>(`${BASE}/weather?meeting_key=latest`);
+  const meetingWeather = await safeFetch<WeatherData[]>('weather', 'meeting_key=latest');
   if (meetingWeather && meetingWeather.length) return meetingWeather[meetingWeather.length - 1];
   return null;
 }
@@ -95,10 +123,10 @@ async function doSync(): Promise<LiveSyncState | null> {
   const meetingKey = cachedMeetingKey;
 
   const [positionsRaw, weatherSession, raceControlRaw, pitRaw] = await Promise.all([
-    safeFetch<{ driver_number: number; position: number; date: string }[]>(`${BASE}/position?session_key=${key}`),
-    safeFetch<WeatherData[]>(`${BASE}/weather?session_key=${key}`),
-    safeFetch<{ date: string; category: string; message: string; flag?: string; driver_number?: number }[]>(`${BASE}/race_control?session_key=${key}`),
-    safeFetch<{ driver_number: number; lap_number: number; pit_duration: number }[]>(`${BASE}/pit?session_key=${key}`),
+    safeFetch<{ driver_number: number; position: number; date: string }[]>('position', `session_key=${key}`),
+    safeFetch<WeatherData[]>('weather', `session_key=${key}`),
+    safeFetch<{ date: string; category: string; message: string; flag?: string; driver_number?: number }[]>('race_control', `session_key=${key}`),
+    safeFetch<{ driver_number: number; lap_number: number; pit_duration: number }[]>('pit', `session_key=${key}`),
   ]);
 
   const latestPositions: Record<number, { driver_number: number; position: number }> = {};
@@ -113,11 +141,11 @@ async function doSync(): Promise<LiveSyncState | null> {
   // Weather: prefer session-specific, fall back to meeting-latest
   let weather: WeatherData | null = weatherSession && weatherSession.length ? weatherSession[weatherSession.length - 1] : null;
   if (!weather && meetingKey) {
-    const meetingWeather = await safeFetch<WeatherData[]>(`${BASE}/weather?meeting_key=${meetingKey}`);
+    const meetingWeather = await safeFetch<WeatherData[]>('weather', `meeting_key=${meetingKey}`);
     if (meetingWeather && meetingWeather.length) weather = meetingWeather[meetingWeather.length - 1];
   }
   if (!weather) {
-    const fallback = await safeFetch<WeatherData[]>(`${BASE}/weather?meeting_key=latest`);
+    const fallback = await safeFetch<WeatherData[]>('weather', 'meeting_key=latest');
     if (fallback && fallback.length) weather = fallback[fallback.length - 1];
   }
 
@@ -158,7 +186,7 @@ async function doSync(): Promise<LiveSyncState | null> {
 export async function getLapData(driverNumber: number): Promise<LapData[]> {
   await refreshSession();
   if (!cachedSessionKey) return [];
-  const data = await safeFetch<LapData[]>(`${BASE}/laps?session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
+  const data = await safeFetch<LapData[]>('laps', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
   return data || [];
 }
 
@@ -177,7 +205,7 @@ export async function getLiveTelemetry(driverNumber?: number): Promise<Telemetry
   if (!driverNumber || isRateLimited()) return simulatedTelemetry();
   await refreshSession();
   if (!cachedSessionKey) return simulatedTelemetry();
-  const data = await safeFetch<TelemetryData[]>(`${BASE}/car_data?session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
+  const data = await safeFetch<TelemetryData[]>('car_data', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
   if (!data || !data.length) return simulatedTelemetry();
   return data[data.length - 1];
 }
