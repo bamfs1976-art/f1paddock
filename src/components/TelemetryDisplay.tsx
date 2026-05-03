@@ -15,8 +15,26 @@ export default function TelemetryDisplay() {
       if (!cancelled) setTelemetry(data);
     };
     tick();
-    const t = setInterval(tick, 200);
-    return () => { cancelled = true; clearInterval(t); };
+    // Poll faster when tab is visible. Pause when hidden.
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const startInterval = () => {
+      if (interval) clearInterval(interval);
+      interval = setInterval(tick, 1000);
+    };
+    const onVis = () => {
+      if (document.hidden) {
+        if (interval) { clearInterval(interval); interval = null; }
+      } else {
+        startInterval();
+      }
+    };
+    if (!document.hidden) startInterval();
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      cancelled = true;
+      if (interval) clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, [driver.number]);
 
   return (

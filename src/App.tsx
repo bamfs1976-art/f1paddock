@@ -39,11 +39,14 @@ export default function App() {
 
     let cancelled = false;
     const tick = async () => {
+      if (document.hidden) return; // skip when tab not visible
       const state = await syncLiveData();
       if (!cancelled && state) setLiveSync(state);
     };
     tick();
     const interval = setInterval(tick, 30000);
+    const onVis = () => { if (!document.hidden) tick(); };
+    document.addEventListener('visibilitychange', onVis);
     const handler = () => {
       const c = getCachedSync();
       if (c) setLiveSync(c);
@@ -52,6 +55,7 @@ export default function App() {
     return () => {
       cancelled = true;
       clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('f1_live_sync_completed', handler);
     };
   }, []);
