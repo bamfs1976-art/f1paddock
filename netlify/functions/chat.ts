@@ -1,10 +1,12 @@
-import type { Handler } from '@netlify/functions';
+import type { Handler, HandlerResponse } from '@netlify/functions';
 import { callClaudeWithHistory } from './utils/claude';
 import { buildF1Context } from './utils/f1-context';
 
 const RATE_WINDOW = 60 * 1000;
 const RATE_MAX = 10;
 const buckets = new Map<string, number[]>();
+
+const JSON_HEADERS: Record<string, string> = { 'Content-Type': 'application/json' };
 
 function rateLimit(ip: string): { ok: boolean; retryAfter?: number } {
   const now = Date.now();
@@ -19,7 +21,7 @@ function rateLimit(ip: string): { ok: boolean; retryAfter?: number } {
 
 const SYSTEM_BASE = `You are an expert Formula 1 analyst and commentator called Paddock AI. You have deep knowledge of F1 history, regulations, strategy, engineering and the current 2026 season. Answer questions conversationally in British English. Be specific and factual. If you are unsure about something, say so. Keep answers concise (under 200 words unless the question demands more).`;
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event): Promise<HandlerResponse> => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method not allowed' };
   }
@@ -30,12 +32,13 @@ export const handler: Handler = async (event) => {
   const ip = event.headers['x-forwarded-for']?.split(',')[0].trim() || 'unknown';
   const limit = rateLimit(ip);
   if (!limit.ok) {
+    const headers: Record<string, string> = {
+      'Retry-After': String(limit.retryAfter || 30),
+      'Content-Type': 'application/json',
+    };
     return {
       statusCode: 429,
-      headers: {
-        'Retry-After': String(limit.retryAfter || 30),
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ error: 'Rate limit exceeded' }),
     };
   }
@@ -63,7 +66,7 @@ export const handler: Handler = async (event) => {
     const text = await callClaudeWithHistory(system, messages, 1500);
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
       body: JSON.stringify({ response: text }),
     };
   } catch (err) {
