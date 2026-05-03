@@ -8,3 +8,6 @@ dist
 .vscode
 .idea
 .claude
+tsconfig.tsbuildinfo
+vite.config.d.ts
+vite.config.js
