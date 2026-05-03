@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --color-paper: #0a0a0a;
+  --color-paper-2: #141414;
+  --color-paper-3: #1e1e1e;
+  --color-ink: #f5f5f0;
+  --color-ink-2: rgba(245, 245, 240, 0.7);
+  --color-ink-3: rgba(245, 245, 240, 0.4);
+  --color-racing: #EF0107;
+
+  --color-mercedes: #27F4D2;
+  --color-ferrari: #E8002D;
+  --color-mclaren: #FF8000;
+  --color-redbull: #3671C6;
+  --color-aston-martin: #229971;
+  --color-alpine: #0093CC;
+  --color-williams: #64C4FF;
+  --color-haas: #B6BABD;
+  --color-racing-bulls: #6692FF;
+  --color-audi: #00877C;
+
+  --color-tyre-soft: #EF0107;
+  --color-tyre-medium: #FFC72C;
+  --color-tyre-hard: #FFFFFF;
+  --color-tyre-inter: #43B02A;
+  --color-tyre-wet: #0072CE;
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+:root {
+  --color-paper: #0a0a0a;
+  --color-paper-2: #141414;
+  --color-paper-3: #1e1e1e;
+  --color-ink: #f5f5f0;
+  --color-ink-2: rgba(245, 245, 240, 0.7);
+  --color-ink-3: rgba(245, 245, 240, 0.4);
+  --color-racing: #EF0107;
+}
+
+body.light {
+  --color-paper: #f5f5f0;
+  --color-paper-2: #ebebdf;
+  --color-paper-3: #e0e0d4;
+  --color-ink: #0a0a0a;
+  --color-ink-2: rgba(10, 10, 10, 0.7);
+  --color-ink-3: rgba(10, 10, 10, 0.4);
+  --color-racing: #EF0107;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(255, 255, 255, 0.015) 0%, transparent 40%),
+    radial-gradient(circle at 75% 85%, rgba(255, 255, 255, 0.01) 0%, transparent 40%);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.font-serif { font-family: 'Playfair Display', Georgia, serif; }
+.font-mono  { font-family: 'JetBrains Mono', monospace; }
+
+.label-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-ink-3);
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--color-ink-2);
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid var(--color-ink-3);
+  background: var(--color-paper-2);
+}
+
+.bg-paper   { background-color: var(--color-paper); }
+.bg-paper-2 { background-color: var(--color-paper-2); }
+.bg-paper-3 { background-color: var(--color-paper-3); }
+.text-ink   { color: var(--color-ink); }
+.text-ink-2 { color: var(--color-ink-2); }
+.text-ink-3 { color: var(--color-ink-3); }
+.text-racing { color: var(--color-racing); }
+.bg-racing  { background-color: var(--color-racing); }
+.border-ink { border-color: var(--color-ink); }
+.border-ink-2 { border-color: var(--color-ink-2); }
+.border-ink-3 { border-color: var(--color-ink-3); }
+.border-racing { border-color: var(--color-racing); }
+
+button, a, [role="button"] {
+  outline: none;
+}
+*:focus-visible {
+  outline: 2px solid var(--color-racing);
+  outline-offset: 2px;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-scroll {
+  animation: ticker-scroll 60s linear infinite;
+}
+
+@keyframes scan-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.scan-sweep {
+  animation: scan-sweep 2.5s linear infinite;
+}
+
+@keyframes scan-line {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+.scan-line {
+  animation: scan-line 2s linear infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+.skeleton-pulse {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+.typing-dot {
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes speed-line {
+  0% { transform: translateX(-100vw) skewX(-20deg); opacity: 0; }
+  10% { opacity: 0.4; }
+  100% { transform: translateX(100vw) skewX(-20deg); opacity: 0; }
+}
+.speed-line {
+  animation: speed-line 4s linear infinite;
+}
+
+.diagonal-bg {
+  position: relative;
+  overflow: hidden;
+}
+.diagonal-bg::before,
+.diagonal-bg::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  width: 200vw;
+  background: linear-gradient(90deg, transparent, var(--color-racing), transparent);
+  opacity: 0.2;
+  pointer-events: none;
+}
+.diagonal-bg::before { top: 30%; left: -50vw; transform: skewY(-2deg); }
+.diagonal-bg::after  { top: 70%; left: -50vw; transform: skewY(-2deg); }
+
+.hover-bar {
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+.hover-bar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--color-racing);
+  transition: width 0.2s ease;
+  pointer-events: none;
+}
+.hover-bar:hover::before { width: 4px; }
+.hover-bar:hover { background-color: var(--color-paper-3); }
+
+.btn-press {
+  transition: transform 0.12s ease, box-shadow 0.18s ease;
+}
+.btn-press:hover { transform: scale(1.02); }
+.btn-press:active { transform: scale(0.98); }
+
+.card-lift {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card-lift:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--color-paper); }
+::-webkit-scrollbar-thumb { background: var(--color-paper-3); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-ink-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ticker-scroll, .scan-sweep, .scan-line, .speed-line, .pulse-dot, .typing-dot {
+    animation: none !important;
+  }
+}
