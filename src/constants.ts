@@ -209,6 +209,17 @@ export const NEWS: NewsItem[] = [
 // Driver identity. DRIVER_NUMBER_MAP (OpenF1 car number to app id) and
 // DRIVER_CODE_MAP (Jolpica three-letter code to app id) are the only places
 // where the two upstream identities are reconciled. Never key on surname.
+//
+// Verification log
+// - 2026-09-06: attempted from the build sandbox; api.openf1.org was blocked
+//   by the sandbox egress policy, so the live comparison could not run. The
+//   numbers below are the best-known 2026 entries (Norris carries #1 as the
+//   2025 champion, Verstappen reverts to #3, Piastri keeps #81, Lindblad #41).
+//   Run `node scripts/verify-drivers.mjs` from a machine with outbound access,
+//   or open the deploy preview and read the "[driver identity]" console line,
+//   then replace this entry with the session key and date it reported.
+//   The app also cross-checks at runtime (src/services/driverIdentity.ts) and
+//   warns in the console with the session key if any number disagrees.
 export const DRIVER_NUMBER_MAP: Record<number, string> = {
   1: 'nor', 81: 'pia',
   3: 'ver', 6: 'had',

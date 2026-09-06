@@ -18,6 +18,7 @@ import SpeedTraceChart from './components/SpeedTraceChart';
 import LiveSyncIndicator from './components/LiveSyncIndicator';
 import Footer from './components/Footer';
 import { syncLiveData, getCachedSync } from './services/f1Service';
+import { checkDriverIdentity } from './services/driverIdentity';
 import type { LiveSyncState } from './types';
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
     if (stored) setTheme(stored);
     const cached = getCachedSync();
     if (cached) setLiveSync(cached);
+    checkDriverIdentity().catch(() => { /* console-only diagnostic */ });
 
     let cancelled = false;
     const tick = async () => {
