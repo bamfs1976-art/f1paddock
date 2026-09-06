@@ -240,6 +240,9 @@ export const NEWS: NewsItem[] = [
   { id: 5, kicker: 'DRIVER', headline: 'Bearman bounces back from a 50G crash to score in Miami', body: 'A heavy accident at Suzuka briefly threatened his weekend but the Briton bounced back, scored points in Miami sprint and now sits seventh in the championship. Haas have built the surprise package of 2026.' },
 ];
 
+// Driver identity. DRIVER_NUMBER_MAP (OpenF1 car number to app id) and
+// DRIVER_CODE_MAP (Jolpica three-letter code to app id) are the only places
+// where the two upstream identities are reconciled. Never key on surname.
 export const DRIVER_NUMBER_MAP: Record<number, string> = {
   1: 'nor', 81: 'pia',
   3: 'ver', 6: 'had',
@@ -252,4 +255,36 @@ export const DRIVER_NUMBER_MAP: Record<number, string> = {
   27: 'hul', 5: 'bor',
   41: 'lin', 30: 'law',
   11: 'per', 77: 'bot',
+};
+
+export const DRIVER_CODE_MAP: Record<string, string> = {
+  NOR: 'nor', PIA: 'pia',
+  VER: 'ver', HAD: 'had',
+  LEC: 'lec', HAM: 'ham',
+  RUS: 'rus', ANT: 'ant',
+  ALO: 'alo', STR: 'str',
+  SAI: 'sai', ALB: 'alb',
+  GAS: 'gas', COL: 'col',
+  OCO: 'oco', BEA: 'bea',
+  HUL: 'hul', BOR: 'bor',
+  LIN: 'lin', LAW: 'law',
+  PER: 'per', BOT: 'bot',
+};
+
+// Jolpica constructor ids to the team names used across the app and in
+// TEAM_COLORS. Both the pre-2026 and 2026 ids are listed where they differ.
+export const CONSTRUCTOR_ID_MAP: Record<string, string> = {
+  mercedes: 'Mercedes',
+  ferrari: 'Ferrari',
+  mclaren: 'McLaren',
+  red_bull: 'Red Bull',
+  haas: 'Haas',
+  alpine: 'Alpine',
+  rb: 'Racing Bulls',
+  racing_bulls: 'Racing Bulls',
+  audi: 'Audi',
+  sauber: 'Audi',
+  williams: 'Williams',
+  cadillac: 'Cadillac',
+  aston_martin: 'Aston Martin',
 };

@@ -159,3 +159,46 @@ export interface UserPreferences {
   favourite_teams: string[];
   theme: 'dark' | 'light';
 }
+
+// Live standings and results from Jolpica (see standingsService).
+export interface DriverStanding {
+  position: number;
+  points: number;
+  wins: number;
+  driverId: string;   // Jolpica id, e.g. "antonelli"
+  id: string;         // app id from DRIVER_CODE_MAP, e.g. "ant"
+  code: string;       // three-letter code, e.g. "ANT"
+  number: number;     // permanent number as reported by Jolpica (0 when absent)
+  name: string;
+  team: string;       // app team name, e.g. "Racing Bulls"
+  color: string;
+}
+
+export interface ConstructorStanding {
+  position: number;
+  points: number;
+  wins: number;
+  constructorId: string;
+  name: string;
+  color: string;
+}
+
+export interface PodiumEntry {
+  code: string;
+  id: string;
+  name: string;
+  team: string;
+  gap: string; // "+0.000" for the winner, "+2.974" or a status such as "+1 Lap"
+}
+
+export interface RoundResult {
+  round: number;
+  raceName: string;
+  date: string;
+  circuitId: string;
+  circuitName: string;
+  winner?: string;
+  winnerTime?: string;
+  podium: PodiumEntry[];
+  fastestLap?: { code: string; id: string; time: string };
+}
