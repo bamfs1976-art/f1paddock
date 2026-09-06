@@ -122,6 +122,7 @@ body {
 .text-loss { color: var(--color-loss); }
 .bg-gain { background-color: var(--color-gain); }
 .bg-loss { background-color: var(--color-loss); }
+.bg-rule { background-color: var(--color-rule); }
 .border-ink { border-color: var(--color-ink); }
 .border-ink-2 { border-color: var(--color-ink-2); }
 /* Borders and decorative rules use --color-rule, never ink-3 (which is text). */

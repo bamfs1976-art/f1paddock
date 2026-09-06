@@ -84,7 +84,7 @@ export default function App() {
       <DesktopHeader theme={theme} onToggleTheme={setTheme} />
       <div className="md:hidden"><ThemeToggle theme={theme} onToggle={setTheme} /></div>
       <Ticker />
-      <Hero weather={liveSync?.weather ?? null} liveStatus={liveActive ? 'LIVE LINK' : null} />
+      <Hero weather={liveSync?.weather ?? null} />
       <StatsRibbon />
 
       {/* Reading order: 01 Calendar, 02 Drivers, 03 Constructors, 04 Race weekend,
