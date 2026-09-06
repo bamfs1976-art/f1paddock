@@ -6,7 +6,8 @@ import { CALENDAR } from '../constants';
 import TyreCompoundBadge from './ui/TyreCompoundBadge';
 import CircuitMap from './ui/CircuitMap';
 import SkeletonLoader from './ui/SkeletonLoader';
-import { useSchedule, useSeasonResults } from '../services/seasonStore';
+import DataNotice from './ui/DataNotice';
+import { useSchedule, useSeasonResults, scheduleResource, resultsResource } from '../services/seasonStore';
 import { findNextRound } from '../services/scheduleService';
 import { getStints, getSessionWeather } from '../services/f1Service';
 import { fmtShortDate } from '../utils/time';
@@ -171,6 +172,23 @@ export default function SeasonCalendar() {
     <section id="calendar" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="calendar-heading">
       <span className="section-label">S 01 // 2026 SEASON</span>
       <h2 id="calendar-heading" className="font-serif text-3xl mt-3 mb-6">Season Calendar</h2>
+      <DataNotice
+        status={schedule.status}
+        fetchedAt={schedule.fetchedAt}
+        snapshot={schedule.status === 'unavailable'}
+        unavailableMessage="Schedule unavailable. Retrying in a minute."
+        onRetry={() => scheduleResource.load(true)}
+        className="mb-3"
+      />
+      {schedule.status !== 'unavailable' && (
+        <DataNotice
+          status={results.status}
+          fetchedAt={results.fetchedAt}
+          unavailableMessage="Race results unavailable. Completed rounds show without winners. Retrying in a minute."
+          onRetry={() => resultsResource.load(true)}
+          className="mb-3"
+        />
+      )}
       {!rounds ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonLoader key={i} type="card" height="140px" />)}

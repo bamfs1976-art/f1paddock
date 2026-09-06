@@ -4,6 +4,7 @@ import { Star, GitCompare } from 'lucide-react';
 import type { Driver, LiveSyncState } from '../types';
 import PositionChangeIndicator from './ui/PositionChangeIndicator';
 import SkeletonLoader from './ui/SkeletonLoader';
+import DataNotice from './ui/DataNotice';
 import DriverProfile from './DriverProfile';
 import DriverComparison from './DriverComparison';
 import { getPreferences, savePreferences } from '../services/supabaseService';
@@ -18,7 +19,7 @@ export default function DriversStandings({ liveSync }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
   const [profile, setProfile] = useState<Driver | null>(null);
   const [showCompare, setShowCompare] = useState(false);
-  const { drivers, round, status } = useDrivers();
+  const { drivers, round, status, fetchedAt, snapshot, retry } = useDrivers();
 
   useEffect(() => {
     (async () => {
@@ -77,6 +78,15 @@ export default function DriversStandings({ liveSync }: Props) {
           </button>
         )}
       </div>
+
+      <DataNotice
+        status={status}
+        fetchedAt={fetchedAt}
+        snapshot={snapshot}
+        unavailableMessage="Standings unavailable. Retrying in a minute."
+        onRetry={retry}
+        className="mb-3"
+      />
 
       <div className="border-2 border-ink bg-paper-2" role="table" aria-live="polite" aria-busy={loading}>
         <div className="grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2 border-b border-rule label-mono">

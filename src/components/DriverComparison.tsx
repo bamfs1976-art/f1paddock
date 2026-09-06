@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { X } from 'lucide-react';
+import { X, RefreshCw } from 'lucide-react';
 import { fetchDriverAnalysis } from '../services/aiService';
 import type { DriverAnalysis } from '../types';
 import { useDrivers } from '../services/seasonStore';
@@ -37,6 +37,7 @@ function StatBar({
 export default function DriverComparison({ codeA, codeB, onClose }: Props) {
   const [analysis, setAnalysis] = useState<DriverAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
   const closeRef = useRef<HTMLButtonElement>(null);
   const { drivers: DRIVERS } = useDrivers();
 
@@ -48,28 +49,25 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
     const handle = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handle);
     document.body.style.overflow = 'hidden';
+    let cancelled = false;
+    setLoading(true);
     (async () => {
       const res = await fetchDriverAnalysis(codeA, codeB);
+      if (cancelled) return;
       setAnalysis(res);
       setLoading(false);
     })();
     return () => {
+      cancelled = true;
       window.removeEventListener('keydown', handle);
       document.body.style.overflow = '';
     };
-  }, [codeA, codeB, onClose]);
+  }, [codeA, codeB, onClose, attempt]);
 
   if (!driverA || !driverB) return null;
 
-  const fallback: DriverAnalysis = {
-    summary: `Comparing ${driverA.name} (${driverA.team}) and ${driverB.name} (${driverB.team}). AI analysis unavailable — showing static comparison.`,
-    paceRating: { driverA: 8 - driverA.pos * 0.1, driverB: 8 - driverB.pos * 0.1 },
-    consistencyRating: { driverA: 7.5, driverB: 7.5 },
-    tyreManagement: { driverA: 7, driverB: 7 },
-    raceCraft: { driverA: 8, driverB: 8 },
-    verdict: `Both drivers bring distinct strengths to the grid this season.`,
-  };
-  const data = analysis || fallback;
+  // No invented ratings: when the generator fails the bars are not drawn.
+  const data = analysis;
 
   return (
     <motion.div
@@ -118,8 +116,15 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
           {loading ? (
             <>
               <SkeletonLoader type="bar" count={4} />
-              <p className="label-mono text-ink-3">ANALYSING TELEMETRY DATA…</p>
+              <p className="label-mono text-ink-3">GENERATING ANALYSIS FROM SEASON RESULTS…</p>
             </>
+          ) : !data ? (
+            <div className="flex items-center justify-between gap-3 flex-wrap font-mono text-sm" role="status">
+              <span>Analysis unavailable. The generator did not respond.</span>
+              <button onClick={() => setAttempt((n) => n + 1)} className="bg-paper-3 border border-rule px-3 py-1.5 text-xs btn-press flex items-center gap-2 hover:border-ink">
+                <RefreshCw size={12} aria-hidden="true" /> REGENERATE ANALYSIS
+              </button>
+            </div>
           ) : (
             <>
               <StatBar label="PACE" valueA={data.paceRating.driverA} valueB={data.paceRating.driverB} colorA={driverA.color} colorB={driverB.color} />
@@ -130,7 +135,7 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
           )}
         </div>
 
-        {!loading && (
+        {!loading && data && (
           <div className="p-6 border-t border-rule bg-paper-2">
             <div className="label-mono mb-2">AI VERDICT</div>
             <p className="font-serif italic text-base mb-3">{data.verdict}</p>

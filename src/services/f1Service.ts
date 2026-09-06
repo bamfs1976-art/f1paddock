@@ -1,5 +1,5 @@
 import type { LiveSyncState, WeatherData, TelemetryData, LapData, RaceControlMessage, PitStop, Stint } from '../types';
-import { recordFreshness } from './proxyClient';
+import { recordFreshness, combineFreshness } from './proxyClient';
 import { DRIVER_NUMBER_MAP } from '../constants';
 
 // Use the Netlify Function proxy in production (server-side caches OpenF1 responses
@@ -186,6 +186,7 @@ async function doSync(): Promise<LiveSyncState | null> {
     duration: p.pit_duration,
   }));
 
+  const freshness = combineFreshness(['openf1:position', 'openf1:weather', 'openf1:race_control', 'openf1:pit']);
   const state: LiveSyncState = {
     timestamp: Date.now(),
     latency: Date.now() - start,
@@ -195,6 +196,8 @@ async function doSync(): Promise<LiveSyncState | null> {
     pitStops,
     sessionKey: cachedSessionKey,
     sessionName: cachedSessionName,
+    stale: freshness?.status === 'stale',
+    dataTimestamp: freshness?.fetchedAt,
   };
 
   try { localStorage.setItem('f1_live_sync', JSON.stringify(state)); } catch { /* quota */ }
@@ -210,24 +213,27 @@ export async function getLapData(driverNumber: number): Promise<LapData[]> {
   return data || [];
 }
 
-function simulatedTelemetry(): TelemetryData {
-  return {
-    speed: 210 + Math.floor(Math.random() * 120),
-    gear: 5 + Math.floor(Math.random() * 4),
-    rpm: 10500 + Math.floor(Math.random() * 2000),
-    drs: Math.random() < 0.2,
-    throttle: 80 + Math.floor(Math.random() * 21),
-    brake: Math.random() < 0.15 ? Math.floor(Math.random() * 100) : 0,
-  };
+/**
+ * Latest car data sample for a driver in the current session, or null when
+ * there is none. Nothing is simulated: callers render "--" without data.
+ */
+export async function getLiveTelemetry(driverNumber?: number): Promise<TelemetryData | null> {
+  if (!driverNumber || isRateLimited()) return null;
+  await refreshSession();
+  if (!cachedSessionKey) return null;
+  const data = await safeFetch<TelemetryData[]>('car_data', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
+  if (!data || !data.length) return null;
+  return data[data.length - 1];
 }
 
-export async function getLiveTelemetry(driverNumber?: number): Promise<TelemetryData> {
-  if (!driverNumber || isRateLimited()) return simulatedTelemetry();
-  await refreshSession();
-  if (!cachedSessionKey) return simulatedTelemetry();
-  const data = await safeFetch<TelemetryData[]>('car_data', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
-  if (!data || !data.length) return simulatedTelemetry();
-  return data[data.length - 1];
+/** Every lap of a session for every driver, or null when the feed is unavailable. */
+export async function getSessionLaps(sessionKey: number): Promise<(LapData & { driver_number: number })[] | null> {
+  return safeFetch<(LapData & { driver_number: number })[]>('laps', `session_key=${sessionKey}`);
+}
+
+/** Name and key of the session the live feeds are currently reading. */
+export function getCurrentSessionInfo(): { key: number | null; name: string | null } {
+  return { key: cachedSessionKey, name: cachedSessionName };
 }
 
 export async function getWeather(): Promise<WeatherData | null> {

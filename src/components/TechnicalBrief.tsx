@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Wind, Zap, ShieldCheck } from 'lucide-react';
-import { syncLiveData, getLiveTelemetry } from '../services/f1Service';
-import type { TelemetryData } from '../types';
+import { syncLiveData, getCurrentSessionInfo } from '../services/f1Service';
+import type { LiveSyncState } from '../types';
 
 const CARDS = [
   {
@@ -57,7 +57,7 @@ function CountUp({ to, suffix = '', prefix = '' }: { to: number; suffix?: string
 export default function TechnicalBrief() {
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [telemetry, setTelemetry] = useState<TelemetryData | null>(null);
+  const [result, setResult] = useState<LiveSyncState | null>(null);
   const [scanned, setScanned] = useState(false);
 
   const startScan = async () => {
@@ -65,7 +65,7 @@ export default function TechnicalBrief() {
     setScanning(true);
     setProgress(0);
     setScanned(false);
-    syncLiveData().catch(() => { /* */ });
+    const sync = syncLiveData().catch(() => null);
 
     const start = Date.now();
     const dur = 2400;
@@ -74,8 +74,8 @@ export default function TechnicalBrief() {
       setProgress(p);
       if (p >= 100) {
         clearInterval(tick);
-        getLiveTelemetry().then((data) => {
-          setTelemetry(data);
+        sync.then((state) => {
+          setResult(state);
           setScanning(false);
           setScanned(true);
         });
@@ -148,7 +148,7 @@ export default function TechnicalBrief() {
         )}
         <div className="relative flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <div className="label-mono mb-1">{scanned ? 'TELEMETRY LINK ESTABLISHED' : scanning ? 'SCANNING…' : 'ENCRYPTED'}</div>
+            <div className="label-mono mb-1">{scanned ? (result ? 'TELEMETRY LINK ESTABLISHED' : 'NO LIVE LINK') : scanning ? 'SCANNING…' : 'ENCRYPTED'}</div>
             <h3 className="font-serif text-xl">Live System Scan</h3>
           </div>
           <button
@@ -162,12 +162,16 @@ export default function TechnicalBrief() {
         <div className="relative h-2 bg-paper-3 mt-4">
           <div className="h-full bg-gain transition-all" style={{ width: `${progress}%` }} />
         </div>
-        {scanned && telemetry && (
-          <div className="relative grid grid-cols-3 gap-3 mt-4 font-mono text-sm">
-            <div><div className="label-mono">SPEED</div><div className="text-2xl">{telemetry.speed} <span className="text-xs text-ink-3">KM/H</span></div></div>
-            <div><div className="label-mono">GEAR</div><div className="text-2xl">{telemetry.gear}</div></div>
-            <div><div className="label-mono">RPM</div><div className="text-2xl">{telemetry.rpm}</div></div>
-          </div>
+        {scanned && (
+          result ? (
+            <div className="relative grid grid-cols-3 gap-3 mt-4 font-mono text-sm">
+              <div><div className="label-mono">SESSION</div><div className="text-lg truncate">{getCurrentSessionInfo().name ?? result.sessionName ?? '--'}</div></div>
+              <div><div className="label-mono">CARS TRACKED</div><div className="text-2xl">{result.positions.length}</div></div>
+              <div><div className="label-mono">LATENCY</div><div className="text-2xl">{result.latency}<span className="text-xs text-ink-3 ml-1">MS</span></div></div>
+            </div>
+          ) : (
+            <p className="relative font-mono text-sm mt-4" role="status">No live OpenF1 link right now. The scan reads real feeds only, so there is nothing to show between sessions.</p>
+          )
         )}
       </div>
     </section>

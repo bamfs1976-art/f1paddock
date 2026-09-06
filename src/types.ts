@@ -139,6 +139,8 @@ export interface LiveSyncState {
   pitStops: PitStop[];
   sessionKey: number | null;
   sessionName: string | null;
+  stale?: boolean;          // true when any feed came from the proxy's stale window
+  dataTimestamp?: number;   // oldest upstream fetch time behind this state
 }
 
 export interface WeatherData {

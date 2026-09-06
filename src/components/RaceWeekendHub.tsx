@@ -6,7 +6,8 @@ import RaceControlFeed from './RaceControlFeed';
 import CircuitMap from './ui/CircuitMap';
 import SessionCountdown from './SessionCountdown';
 import SkeletonLoader from './ui/SkeletonLoader';
-import { useSchedule } from '../services/seasonStore';
+import DataNotice from './ui/DataNotice';
+import { useSchedule, scheduleResource } from '../services/seasonStore';
 import { findNextRound } from '../services/scheduleService';
 import { fmtDayTime } from '../utils/time';
 import { useNow } from '../hooks/useNow';
@@ -41,6 +42,13 @@ export default function RaceWeekendHub({ liveSync }: Props) {
     <section id="weekend" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="weekend-heading">
       <span className="section-label">S 04 // RACE WEEKEND</span>
       <h2 id="weekend-heading" className="font-serif text-3xl mt-3 mb-6">Race Weekend Hub</h2>
+      <DataNotice
+        status={schedule.status}
+        fetchedAt={schedule.fetchedAt}
+        unavailableMessage="Race weekend schedule unavailable. Retrying in a minute."
+        onRetry={() => scheduleResource.load(true)}
+        className="mb-3"
+      />
 
       <div className="border-2 border-ink bg-paper-2">
         {!next ? (

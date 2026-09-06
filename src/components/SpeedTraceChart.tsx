@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
-import { getLapData } from '../services/f1Service';
+import { getLapData, getCurrentSessionInfo } from '../services/f1Service';
 import type { LapData } from '../types';
 import { useDrivers } from '../services/seasonStore';
 
@@ -62,16 +62,20 @@ export default function SpeedTraceChart({ driverIds }: Props) {
   if (loading) {
     return <div className="label-mono text-ink-3 p-4">LOADING LAP DATA…</div>;
   }
+  const session = getCurrentSessionInfo();
+
   if (!rows.length) {
     return (
-      <div className="border border-dashed border-rule p-6 label-mono text-ink-3">
-        NO LAP DATA AVAILABLE FOR THIS SESSION
+      <div className="border border-dashed border-rule p-6 font-mono text-sm" role="status">
+        No lap data from OpenF1 for {session.name ? `the ${session.name}` : 'this session'} yet. Lap times appear once cars have run.
       </div>
     );
   }
 
   return (
-    <div className="border border-rule bg-paper-2 p-3 h-[300px]">
+    <div className="border border-rule bg-paper-2 p-3">
+      {session.name && <div className="label-mono mb-2">SESSION · {session.name.toUpperCase()}</div>}
+      <div className="h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={rows}>
           <CartesianGrid stroke="var(--color-rule)" />
@@ -97,6 +101,7 @@ export default function SpeedTraceChart({ driverIds }: Props) {
           ))}
         </LineChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
