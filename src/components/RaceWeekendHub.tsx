@@ -5,6 +5,7 @@ import WeatherBar from './WeatherBar';
 import RaceControlFeed from './RaceControlFeed';
 import CircuitMap from './ui/CircuitMap';
 import SessionCountdown from './SessionCountdown';
+import ModelViewCard from './ModelViewCard';
 import SkeletonLoader from './ui/SkeletonLoader';
 import DataNotice from './ui/DataNotice';
 import { useSchedule, scheduleResource } from '../services/seasonStore';
@@ -94,7 +95,9 @@ export default function RaceWeekendHub({ liveSync }: Props) {
           </div>
         )}
 
-        <div className="p-4 sm:p-6">
+        {next && <ModelViewCard round={next.round} />}
+
+        <div className="p-4 sm:p-6 border-t border-rule">
           <button
             onClick={() => setShowRC(!showRC)}
             className="flex items-center gap-2 label-mono mb-3"
