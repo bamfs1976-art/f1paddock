@@ -64,7 +64,7 @@ export default function ConstructorsStandings() {
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04, duration: 0.3 }}
+                  transition={{ delay: idx * 0.04, duration: 0.3, layout: { duration: 0.3, delay: 0 } }}
                   className={`hover-bar grid grid-cols-[40px_30px_4px_1fr_70px_60px_70px] sm:grid-cols-[50px_40px_4px_1fr_120px_80px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-rule ${isFav ? 'bg-paper-3/40' : ''}`}
                 >
                   <div className="font-mono font-bold tabular-nums">{t.pos}</div>

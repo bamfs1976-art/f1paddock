@@ -1,4 +1,5 @@
 import type { WeatherData } from '../types';
+import { useEffect, useRef, useState } from 'react';
 import { useSchedule, useDrivers } from '../services/seasonStore';
 import { findLiveSession, findUpcomingSession } from '../services/scheduleService';
 import { countdownTo, fmtDayTime, fmtLongDate } from '../utils/time';
@@ -28,9 +29,42 @@ export default function Hero({ weather }: Props) {
   const second = drivers[1];
   const leaderGap = leader && second ? leader.pts - second.pts : null;
 
+  // Speed lines run for two seconds on two events only: the live link's first
+  // successful sync, and a session entering its live window.
+  const [speedActive, setSpeedActive] = useState(false);
+  const speedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const burst = () => {
+    if (speedTimer.current) clearTimeout(speedTimer.current);
+    setSpeedActive(false);
+    // Next frame so a repeat trigger restarts the keyframe.
+    requestAnimationFrame(() => {
+      setSpeedActive(true);
+      speedTimer.current = setTimeout(() => setSpeedActive(false), 2000);
+    });
+  };
+  useEffect(() => {
+    const onFirstSync = () => burst();
+    window.addEventListener('f1_live_sync_completed', onFirstSync, { once: true });
+    return () => {
+      window.removeEventListener('f1_live_sync_completed', onFirstSync);
+      if (speedTimer.current) clearTimeout(speedTimer.current);
+    };
+  }, []);
+  // A session "enters" its live window when liveKey changes from null (or a
+  // different session) while the page is open. Loading mid-session is not a
+  // trigger, so the first evaluation after the schedule arrives only records.
+  const liveKey = live ? `${live.round.round}:${live.session.name}` : null;
+  const prevLiveKey = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!rounds) return;
+    if (prevLiveKey.current !== undefined && liveKey && liveKey !== prevLiveKey.current) burst();
+    prevLiveKey.current = liveKey;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveKey, rounds]);
+
   return (
     <section className="diagonal-bg border-b-2 border-ink py-10 px-6 sm:px-10 relative overflow-hidden" aria-label="Season status">
-      <div className="pointer-events-none absolute inset-0 opacity-30" aria-hidden="true">
+      <div className={`pointer-events-none absolute inset-0 opacity-30 ${speedActive ? 'speed-lines-active' : ''}`} aria-hidden="true">
         {[...Array(4)].map((_, i) => (
           <div
             key={i}

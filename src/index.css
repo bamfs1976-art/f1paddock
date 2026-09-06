@@ -148,12 +148,19 @@ button, a, [role="button"] {
   animation: pulse-dot 1.4s ease-in-out infinite;
 }
 
+/* Ticker: one pass on mount, then still. Remounting the element runs another
+   pass. Pointer hover or keyboard focus pauses the pass in progress. */
 @keyframes ticker-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.ticker-scroll {
-  animation: ticker-scroll 60s linear infinite;
+.ticker-once {
+  animation: ticker-scroll 40s linear 1 forwards;
+}
+[role="marquee"]:hover .ticker-once,
+[role="marquee"]:focus-within .ticker-once,
+[role="marquee"]:focus .ticker-once {
+  animation-play-state: paused;
 }
 
 @keyframes scan-sweep {
@@ -190,13 +197,20 @@ button, a, [role="button"] {
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
+/* Hero speed lines: static by default. The hero adds .speed-lines-active for
+   two seconds when the live link first connects and whenever a session
+   enters its live window; the class, not a permanent keyframe, drives them. */
 @keyframes speed-line {
   0% { transform: translateX(-100vw) skewX(-20deg); opacity: 0; }
   10% { opacity: 0.4; }
   100% { transform: translateX(100vw) skewX(-20deg); opacity: 0; }
 }
 .speed-line {
-  animation: speed-line 4s linear infinite;
+  opacity: 0.12;
+  transform: skewX(-20deg);
+}
+.speed-lines-active .speed-line {
+  animation: speed-line 2s linear 1;
 }
 
 .diagonal-bg {
@@ -259,7 +273,7 @@ button, a, [role="button"] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .ticker-scroll, .scan-sweep, .scan-line, .speed-line, .pulse-dot, .typing-dot {
+  .ticker-once, .scan-sweep, .scan-line, .speed-line, .speed-lines-active .speed-line, .pulse-dot, .typing-dot {
     animation: none !important;
   }
 }

@@ -112,7 +112,7 @@ export default function DriversStandings({ liveSync }: Props) {
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.03, duration: 0.3 }}
+                  transition={{ delay: idx * 0.03, duration: 0.3, layout: { duration: 0.3, delay: 0 } }}
                   className={`hover-bar grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-rule ${isFav ? 'bg-paper-3/40' : ''}`}
                 >
                   <div className="font-mono font-bold tabular-nums">{d.pos}</div>
