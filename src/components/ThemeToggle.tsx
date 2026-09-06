@@ -5,9 +5,11 @@ import { savePreferences, getPreferences } from '../services/supabaseService';
 interface Props {
   theme: 'dark' | 'light';
   onToggle: (next: 'dark' | 'light') => void;
+  /** "fixed" floats top-right (mobile); "inline" sits inside the desktop header. */
+  variant?: 'fixed' | 'inline';
 }
 
-export default function ThemeToggle({ theme, onToggle }: Props) {
+export default function ThemeToggle({ theme, onToggle, variant = 'fixed' }: Props) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function ThemeToggle({ theme, onToggle }: Props) {
   return (
     <button
       onClick={handle}
-      className="fixed top-4 right-4 z-50 bg-paper-2 border border-ink-3 p-2 btn-press hover:border-ink"
+      className={`${variant === 'fixed' ? 'fixed top-4 right-4 z-50' : ''} bg-paper-2 border border-rule p-2 btn-press hover:border-ink`}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       title="Toggle theme"
     >

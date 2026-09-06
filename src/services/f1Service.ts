@@ -1,4 +1,5 @@
-import type { LiveSyncState, WeatherData, TelemetryData, LapData, RaceControlMessage, PitStop } from '../types';
+import type { LiveSyncState, WeatherData, TelemetryData, LapData, RaceControlMessage, PitStop, Stint } from '../types';
+import { recordFreshness, combineFreshness } from './proxyClient';
 import { DRIVER_NUMBER_MAP } from '../constants';
 
 // Use the Netlify Function proxy in production (server-side caches OpenF1 responses
@@ -25,7 +26,7 @@ let lastPositions: { driver_number: number; position: number }[] = [];
 let syncInFlight: Promise<LiveSyncState | null> | null = null;
 let backoffUntil = 0;
 
-async function safeFetchUrl<T>(url: string): Promise<T | null> {
+async function safeFetchUrl<T>(url: string, key?: string): Promise<T | null> {
   if (Date.now() < backoffUntil) return null;
   try {
     const res = await fetch(url);
@@ -39,6 +40,7 @@ async function safeFetchUrl<T>(url: string): Promise<T | null> {
       return null;
     }
     if (!res.ok) return null;
+    if (key) recordFreshness(key, res.headers.get('X-Cache'), res.headers.get('X-Cache-Timestamp'));
     return (await res.json()) as T;
   } catch {
     return null;
@@ -47,12 +49,30 @@ async function safeFetchUrl<T>(url: string): Promise<T | null> {
 
 async function safeFetch<T>(path: string, query = ''): Promise<T | null> {
   // Try proxy first; safeFetchUrl flips useDirect=true on 404 so we can retry direct.
-  const first = await safeFetchUrl<T>(buildUrl(path, query));
+  const key = `openf1:${path}`;
+  const first = await safeFetchUrl<T>(buildUrl(path, query), key);
   if (first !== null) return first;
   if (useDirect) {
-    return safeFetchUrl<T>(buildUrl(path, query));
+    return safeFetchUrl<T>(buildUrl(path, query), key);
   }
   return null;
+}
+
+/** Generic OpenF1 read through the proxy. Returns null on any failure. */
+export function fetchOpenF1<T>(path: string, query = ''): Promise<T | null> {
+  return safeFetch<T>(path, query);
+}
+
+/** Tyre stints for a session, used for compound badges on completed rounds. */
+export async function getStints(sessionKey: number): Promise<Stint[]> {
+  const data = await safeFetch<Stint[]>('stints', `session_key=${sessionKey}`);
+  return data || [];
+}
+
+/** Final weather reading of a session. */
+export async function getSessionWeather(sessionKey: number): Promise<WeatherData | null> {
+  const data = await safeFetch<WeatherData[]>('weather', `session_key=${sessionKey}`);
+  return data && data.length ? data[data.length - 1] : null;
 }
 
 export function isRateLimited(): boolean {
@@ -166,6 +186,7 @@ async function doSync(): Promise<LiveSyncState | null> {
     duration: p.pit_duration,
   }));
 
+  const freshness = combineFreshness(['openf1:position', 'openf1:weather', 'openf1:race_control', 'openf1:pit']);
   const state: LiveSyncState = {
     timestamp: Date.now(),
     latency: Date.now() - start,
@@ -175,6 +196,8 @@ async function doSync(): Promise<LiveSyncState | null> {
     pitStops,
     sessionKey: cachedSessionKey,
     sessionName: cachedSessionName,
+    stale: freshness?.status === 'stale',
+    dataTimestamp: freshness?.fetchedAt,
   };
 
   try { localStorage.setItem('f1_live_sync', JSON.stringify(state)); } catch { /* quota */ }
@@ -183,31 +206,34 @@ async function doSync(): Promise<LiveSyncState | null> {
   return state;
 }
 
-export async function getLapData(driverNumber: number): Promise<LapData[]> {
+/** Laps for one driver in the current session; null when the feed is unavailable. */
+export async function getLapData(driverNumber: number): Promise<LapData[] | null> {
   await refreshSession();
-  if (!cachedSessionKey) return [];
-  const data = await safeFetch<LapData[]>('laps', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
-  return data || [];
+  if (!cachedSessionKey) return null;
+  return safeFetch<LapData[]>('laps', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
 }
 
-function simulatedTelemetry(): TelemetryData {
-  return {
-    speed: 210 + Math.floor(Math.random() * 120),
-    gear: 5 + Math.floor(Math.random() * 4),
-    rpm: 10500 + Math.floor(Math.random() * 2000),
-    drs: Math.random() < 0.2,
-    throttle: 80 + Math.floor(Math.random() * 21),
-    brake: Math.random() < 0.15 ? Math.floor(Math.random() * 100) : 0,
-  };
-}
-
-export async function getLiveTelemetry(driverNumber?: number): Promise<TelemetryData> {
-  if (!driverNumber || isRateLimited()) return simulatedTelemetry();
+/**
+ * Latest car data sample for a driver in the current session, or null when
+ * there is none. Nothing is simulated: callers render "--" without data.
+ */
+export async function getLiveTelemetry(driverNumber?: number): Promise<TelemetryData | null> {
+  if (!driverNumber || isRateLimited()) return null;
   await refreshSession();
-  if (!cachedSessionKey) return simulatedTelemetry();
+  if (!cachedSessionKey) return null;
   const data = await safeFetch<TelemetryData[]>('car_data', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
-  if (!data || !data.length) return simulatedTelemetry();
+  if (!data || !data.length) return null;
   return data[data.length - 1];
+}
+
+/** Every lap of a session for every driver, or null when the feed is unavailable. */
+export async function getSessionLaps(sessionKey: number): Promise<(LapData & { driver_number: number })[] | null> {
+  return safeFetch<(LapData & { driver_number: number })[]>('laps', `session_key=${sessionKey}`);
+}
+
+/** Name and key of the session the live feeds are currently reading. */
+export function getCurrentSessionInfo(): { key: number | null; name: string | null } {
+  return { key: cachedSessionKey, name: cachedSessionName };
 }
 
 export async function getWeather(): Promise<WeatherData | null> {

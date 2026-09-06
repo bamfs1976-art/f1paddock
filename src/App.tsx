@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import Hero from './components/Hero';
 import ThemeToggle from './components/ThemeToggle';
-import MobileNav, { type Tab } from './components/MobileNav';
+import DesktopHeader from './components/DesktopHeader';
+import MobileNav from './components/MobileNav';
+import type { Tab } from './navigation';
 import StatsRibbon from './components/StatsRibbon';
 import Ticker from './components/Ticker';
 import DriversStandings from './components/DriversStandings';
@@ -18,6 +20,7 @@ import SpeedTraceChart from './components/SpeedTraceChart';
 import LiveSyncIndicator from './components/LiveSyncIndicator';
 import Footer from './components/Footer';
 import { syncLiveData, getCachedSync } from './services/f1Service';
+import { checkDriverIdentity } from './services/driverIdentity';
 import type { LiveSyncState } from './types';
 
 export default function App() {
@@ -36,6 +39,7 @@ export default function App() {
     if (stored) setTheme(stored);
     const cached = getCachedSync();
     if (cached) setLiveSync(cached);
+    checkDriverIdentity().catch(() => { /* console-only diagnostic */ });
 
     let cancelled = false;
     const tick = async () => {
@@ -62,7 +66,7 @@ export default function App() {
 
   const liveActive = !!liveSync && Date.now() - liveSync.timestamp < 5 * 60 * 1000;
 
-  // Mobile: show one tab at a time. Desktop: show all sections.
+  // Mobile: show one tab at a time. Desktop: show all sections with anchors.
   const [isMobile, setIsMobile] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false
   );
@@ -73,29 +77,33 @@ export default function App() {
     return () => mq.removeEventListener('change', handle);
   }, []);
 
+  const show = (t: Tab) => !isMobile || tab === t;
+
   return (
-    <div className="min-h-screen pb-24 md:pb-0">
-      <ThemeToggle theme={theme} onToggle={setTheme} />
+    <div id="top" className="min-h-screen pb-24 md:pb-0">
+      <DesktopHeader theme={theme} onToggleTheme={setTheme} />
+      <div className="md:hidden"><ThemeToggle theme={theme} onToggle={setTheme} /></div>
       <Ticker />
-      <Hero weather={liveSync?.weather ?? null} liveStatus={liveActive ? 'LIVE LINK' : null} />
+      <Hero weather={liveSync?.weather ?? null} />
       <StatsRibbon />
 
-      {/* Desktop: full scroll layout. Mobile: tab routing. */}
+      {/* Reading order: 01 Calendar, 02 Drivers, 03 Constructors, 04 Race weekend,
+          05 Live telemetry, 06 Speed trace, 07 Paddock intel, 08 Technical brief. */}
       <main>
-        {(!isMobile || tab === 'calendar')   && <SeasonCalendar />}
-        {(!isMobile || tab === 'standings')  && <DriversStandings liveSync={liveSync} />}
-        {(!isMobile || tab === 'standings')  && <ConstructorsStandings />}
-        {(!isMobile || tab === 'live')       && <RaceWeekendHub liveSync={liveSync} />}
-        {(!isMobile || tab === 'live')       && <TelemetryDisplay />}
-        {(!isMobile || tab === 'live')       && (
-          <section className="px-6 sm:px-10 pb-6">
+        {show('calendar') && <SeasonCalendar />}
+        {show('standings') && <DriversStandings liveSync={liveSync} />}
+        {show('standings') && <ConstructorsStandings />}
+        {show('live') && <RaceWeekendHub liveSync={liveSync} />}
+        {show('live') && <TelemetryDisplay />}
+        {show('live') && (
+          <section id="speedtrace" className="px-6 sm:px-10 pb-6 scroll-mt-14" aria-labelledby="speedtrace-heading">
             <span className="section-label">S 06 // SPEED TRACE</span>
-            <h2 className="font-serif text-2xl mt-2 mb-3">Lap Time Comparison</h2>
+            <h2 id="speedtrace-heading" className="font-serif text-2xl mt-2 mb-3">Lap Time Comparison</h2>
             <SpeedTraceChart />
           </section>
         )}
-        {(!isMobile || tab === 'live')       && (
-          <section className="px-6 sm:px-10 pb-6">
+        {show('live') && (
+          <section className="px-6 sm:px-10 pb-6" aria-label="Race control and weather">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <div className="label-mono mb-2">RACE CONTROL</div>
@@ -108,8 +116,8 @@ export default function App() {
             </div>
           </section>
         )}
-        {(!isMobile || tab === 'intel')      && <PaddockIntel />}
-        {(!isMobile)                         && <TechnicalBrief />}
+        {show('intel') && <PaddockIntel />}
+        {show('intel') && <TechnicalBrief />}
       </main>
 
       <Footer />

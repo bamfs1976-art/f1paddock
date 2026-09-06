@@ -55,7 +55,7 @@ export default function DriverProfile({ driver, onClose }: Props) {
               <button
                 ref={closeRef}
                 onClick={onClose}
-                className="p-2 border border-ink-3 btn-press"
+                className="p-2 border border-rule btn-press"
                 aria-label="Close profile"
               >
                 <X size={16} aria-hidden="true" />
@@ -69,7 +69,7 @@ export default function DriverProfile({ driver, onClose }: Props) {
                 { label: 'TITLES', value: driver.careerStats.titles },
                 { label: 'RACES', value: driver.careerStats.races },
               ].map((s) => (
-                <div key={s.label} className="border border-ink-3 bg-paper-2 p-3 text-center">
+                <div key={s.label} className="border border-rule bg-paper-2 p-3 text-center">
                   <div className="font-serif text-2xl font-bold">{s.value}</div>
                   <div className="label-mono mt-1">{s.label}</div>
                 </div>
@@ -83,7 +83,7 @@ export default function DriverProfile({ driver, onClose }: Props) {
               </div>
             )}
 
-            <div className="border border-dashed border-ink-3 p-3 label-mono text-ink-3">
+            <div className="border border-dashed border-rule p-3 label-mono text-ink-3">
               SEASON POINTS · {driver.pts}  ·  GAP · {driver.gap}
             </div>
           </div>

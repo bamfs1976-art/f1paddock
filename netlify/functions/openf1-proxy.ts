@@ -2,8 +2,17 @@ import type { Handler, HandlerResponse } from '@netlify/functions';
 
 // Module-scoped cache. Netlify keeps the function warm so repeat hits get cache.
 const cache = new Map<string, { data: unknown; status: number; ts: number }>();
-const TTL_MS = 15_000;
-const STALE_TTL_MS = 5 * 60_000; // serve stale up to 5 min if upstream is rate-limited
+
+// Fresh and stale windows per path. Live feeds turn over every 15 seconds;
+// the schedule endpoints change a few times a season so they are held for
+// hours and served stale for days if OpenF1 is unreachable.
+const HOUR = 60 * 60_000;
+const WINDOWS: Record<string, { ttl: number; stale: number }> = {
+  meetings: { ttl: 24 * HOUR, stale: 7 * 24 * HOUR },
+  sessions: { ttl: HOUR, stale: 7 * 24 * HOUR },
+  drivers:  { ttl: HOUR, stale: 7 * 24 * HOUR },
+};
+const DEFAULT_WINDOW = { ttl: 15_000, stale: 5 * 60_000 };
 
 const ALLOWED = new Set([
   'sessions',
@@ -39,13 +48,14 @@ export const handler: Handler = async (event): Promise<HandlerResponse> => {
 
   const url = `https://api.openf1.org/v1/${path}${query ? `?${query}` : ''}`;
   const now = Date.now();
+  const { ttl: TTL_MS, stale: STALE_TTL_MS } = WINDOWS[path] || DEFAULT_WINDOW;
 
   // Fresh cache hit
   const cached = cache.get(url);
   if (cached && now - cached.ts < TTL_MS) {
     return {
       statusCode: cached.status,
-      headers: { ...JSON_HEADERS, 'X-Cache': 'HIT' },
+      headers: { ...JSON_HEADERS, 'X-Cache': 'HIT', 'X-Cache-Timestamp': new Date(cached.ts).toISOString() },
       body: JSON.stringify(cached.data),
     };
   }
@@ -58,7 +68,12 @@ export const handler: Handler = async (event): Promise<HandlerResponse> => {
       if (cached && now - cached.ts < STALE_TTL_MS) {
         return {
           statusCode: cached.status,
-          headers: { ...JSON_HEADERS, 'X-Cache': 'STALE', 'X-Upstream-Status': String(res.status) },
+          headers: {
+            ...JSON_HEADERS,
+            'X-Cache': 'STALE',
+            'X-Cache-Timestamp': new Date(cached.ts).toISOString(),
+            'X-Upstream-Status': String(res.status),
+          },
           body: JSON.stringify(cached.data),
         };
       }
@@ -81,14 +96,14 @@ export const handler: Handler = async (event): Promise<HandlerResponse> => {
     cache.set(url, { data, status: 200, ts: now });
     return {
       statusCode: 200,
-      headers: { ...JSON_HEADERS, 'X-Cache': 'MISS' },
+      headers: { ...JSON_HEADERS, 'X-Cache': 'MISS', 'X-Cache-Timestamp': new Date(now).toISOString() },
       body: JSON.stringify(data),
     };
   } catch (err) {
     if (cached && now - cached.ts < STALE_TTL_MS) {
       return {
         statusCode: 200,
-        headers: { ...JSON_HEADERS, 'X-Cache': 'STALE-FETCH-FAIL' },
+        headers: { ...JSON_HEADERS, 'X-Cache': 'STALE-FETCH-FAIL', 'X-Cache-Timestamp': new Date(cached.ts).toISOString() },
         body: JSON.stringify(cached.data),
       };
     }

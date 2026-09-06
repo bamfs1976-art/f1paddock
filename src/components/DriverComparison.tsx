@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { X } from 'lucide-react';
+import { X, RefreshCw } from 'lucide-react';
 import { fetchDriverAnalysis } from '../services/aiService';
-import { DRIVERS } from '../constants';
 import type { DriverAnalysis } from '../types';
+import { useDrivers } from '../services/seasonStore';
 import SkeletonLoader from './ui/SkeletonLoader';
 
 interface Props {
@@ -37,7 +37,9 @@ function StatBar({
 export default function DriverComparison({ codeA, codeB, onClose }: Props) {
   const [analysis, setAnalysis] = useState<DriverAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { drivers: DRIVERS } = useDrivers();
 
   const driverA = DRIVERS.find((d) => d.code === codeA);
   const driverB = DRIVERS.find((d) => d.code === codeB);
@@ -47,28 +49,25 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
     const handle = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handle);
     document.body.style.overflow = 'hidden';
+    let cancelled = false;
+    setLoading(true);
     (async () => {
       const res = await fetchDriverAnalysis(codeA, codeB);
+      if (cancelled) return;
       setAnalysis(res);
       setLoading(false);
     })();
     return () => {
+      cancelled = true;
       window.removeEventListener('keydown', handle);
       document.body.style.overflow = '';
     };
-  }, [codeA, codeB, onClose]);
+  }, [codeA, codeB, onClose, attempt]);
 
   if (!driverA || !driverB) return null;
 
-  const fallback: DriverAnalysis = {
-    summary: `Comparing ${driverA.name} (${driverA.team}) and ${driverB.name} (${driverB.team}). AI analysis unavailable — showing static comparison.`,
-    paceRating: { driverA: 8 - driverA.pos * 0.1, driverB: 8 - driverB.pos * 0.1 },
-    consistencyRating: { driverA: 7.5, driverB: 7.5 },
-    tyreManagement: { driverA: 7, driverB: 7 },
-    raceCraft: { driverA: 8, driverB: 8 },
-    verdict: `Both drivers bring distinct strengths to the grid this season.`,
-  };
-  const data = analysis || fallback;
+  // No invented ratings: when the generator fails the bars are not drawn.
+  const data = analysis;
 
   return (
     <motion.div
@@ -87,38 +86,45 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
         className="bg-paper border-2 border-ink max-w-4xl w-full my-8"
       >
-        <header className="flex items-center justify-between px-6 py-4 border-b border-ink-3">
+        <header className="flex items-center justify-between px-6 py-4 border-b border-rule">
           <h2 id="compare-title" className="font-serif text-2xl">
             <span className="label-mono mr-3">TELEMETRY COMPARISON</span>
             {codeA} <span className="text-ink-3">vs</span> {codeB}
           </h2>
-          <button ref={closeRef} onClick={onClose} className="p-2 border border-ink-3 btn-press" aria-label="Close comparison">
+          <button ref={closeRef} onClick={onClose} className="p-2 border border-rule btn-press" aria-label="Close comparison">
             <X size={16} aria-hidden="true" />
           </button>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2">
           {[driverA, driverB].map((d) => (
-            <div key={d.id} className="p-6 border-r border-ink-3 last:border-r-0">
+            <div key={d.id} className="p-6 border-r border-rule last:border-r-0">
               <div className="h-1 mb-3" style={{ background: d.color }} aria-hidden="true" />
               <div className="label-mono">{d.country} · #{d.number}</div>
               <h3 className="font-serif text-2xl mt-1">{d.name}</h3>
               <p className="text-sm text-ink-2">{d.team}</p>
               <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                <div className="border border-ink-3 p-2"><div className="font-bold">{d.pts}</div><div className="label-mono">PTS</div></div>
-                <div className="border border-ink-3 p-2"><div className="font-bold">P{d.pos}</div><div className="label-mono">POS</div></div>
-                <div className="border border-ink-3 p-2"><div className="font-bold">{d.careerStats?.wins || 0}</div><div className="label-mono">WINS</div></div>
+                <div className="border border-rule p-2"><div className="font-bold">{d.pts}</div><div className="label-mono">PTS</div></div>
+                <div className="border border-rule p-2"><div className="font-bold">P{d.pos}</div><div className="label-mono">POS</div></div>
+                <div className="border border-rule p-2"><div className="font-bold">{d.careerStats?.wins || 0}</div><div className="label-mono">WINS</div></div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="p-6 border-t border-ink-3 space-y-4">
+        <div className="p-6 border-t border-rule space-y-4">
           {loading ? (
             <>
               <SkeletonLoader type="bar" count={4} />
-              <p className="label-mono text-ink-3">ANALYSING TELEMETRY DATA…</p>
+              <p className="label-mono text-ink-3">GENERATING ANALYSIS FROM SEASON RESULTS…</p>
             </>
+          ) : !data ? (
+            <div className="flex items-center justify-between gap-3 flex-wrap font-mono text-sm" role="status">
+              <span>Analysis unavailable. The generator did not respond.</span>
+              <button onClick={() => setAttempt((n) => n + 1)} className="bg-paper-3 border border-rule px-3 py-1.5 text-xs btn-press flex items-center gap-2 hover:border-ink">
+                <RefreshCw size={12} aria-hidden="true" /> REGENERATE ANALYSIS
+              </button>
+            </div>
           ) : (
             <>
               <StatBar label="PACE" valueA={data.paceRating.driverA} valueB={data.paceRating.driverB} colorA={driverA.color} colorB={driverB.color} />
@@ -129,8 +135,8 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
           )}
         </div>
 
-        {!loading && (
-          <div className="p-6 border-t border-ink-3 bg-paper-2">
+        {!loading && data && (
+          <div className="p-6 border-t border-rule bg-paper-2">
             <div className="label-mono mb-2">AI VERDICT</div>
             <p className="font-serif italic text-base mb-3">{data.verdict}</p>
             <p className="text-sm text-ink-2 leading-relaxed">{data.summary}</p>

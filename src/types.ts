@@ -14,6 +14,7 @@ export interface Driver {
   image?: string;
   posChange?: number;
   number?: number;
+  wins?: number;
 }
 
 export interface Team {
@@ -26,38 +27,53 @@ export interface Team {
   color: string;
   isFav?: boolean;
   posChange?: number;
+  wins?: number;
 }
 
+// Static circuit metadata, one entry per round, edited by hand in constants.ts.
 export interface Race {
-  round: number | string;
+  round: number;
   country: string;
   flag: string;
   circuit: string;
-  date: string;
-  circuitId?: string;
-  winner?: string;
-  podium?: string[];
-  podiumDetailed?: { driver: string; team: string; gap: string }[];
-  fastestLap?: { driver: string; time: string };
-  weather?: string;
+  circuitId?: string;   // key into CircuitMap paths
+  ergastId?: string;    // Jolpica circuitId, used to match schedule rows
+  date: string;         // fallback race date, yyyy-mm-dd
   location?: string;
   laps?: number;
   distance?: string;
-  tyreCompounds?: string[];
-  isDone?: boolean;
-  isNext?: boolean;
-  isCancelled?: boolean;
-  sessions?: RaceSession[];
 }
 
-export interface RaceSession {
-  type: 'FP1' | 'FP2' | 'FP3' | 'Qualifying' | 'Sprint Qualifying' | 'Sprint' | 'Race';
-  date: string;
-  time: string;
-  status: 'upcoming' | 'live' | 'completed';
+// A session in the merged schedule (see scheduleService).
+export interface ScheduleSession {
+  name: string;          // real session name: Practice 1, Sprint Qualifying, Qualifying, Race
+  dateStart: string;     // ISO datetime
+  dateEnd: string;       // ISO datetime; estimated when the source has no end time
+  sessionKey?: number;   // OpenF1 session key when known
+  source: 'openf1' | 'jolpica' | 'static';
 }
 
-export interface NewsItem {
+// One round of the season merged from static metadata, Jolpica and OpenF1.
+export interface ScheduleRound extends Race {
+  name: string;          // "Italian Grand Prix"
+  meetingKey?: number;
+  raceStart?: string;    // ISO datetime of the race start when known
+  isSprint: boolean;
+  sessions: ScheduleSession[];
+}
+
+export interface Stint {
+  driver_number: number;
+  stint_number: number;
+  lap_start: number;
+  lap_end: number;
+  compound: string;
+  tyre_age_at_start?: number;
+}
+
+// One generated analysis item. These are analysis grounded in standings and
+// results, never news: the model has no reporting source and must not quote.
+export interface AnalysisItem {
   id: number;
   kicker: string;
   headline: string;
@@ -94,7 +110,7 @@ export interface TickerItem {
 }
 
 export interface PaddockIntelData {
-  news: NewsItem[];
+  analysis: AnalysisItem[];
   paddockIntel: string;
   ticker: TickerItem[];
   racePreview?: {
@@ -123,6 +139,8 @@ export interface LiveSyncState {
   pitStops: PitStop[];
   sessionKey: number | null;
   sessionName: string | null;
+  stale?: boolean;          // true when any feed came from the proxy's stale window
+  dataTimestamp?: number;   // oldest upstream fetch time behind this state
 }
 
 export interface WeatherData {
@@ -158,4 +176,47 @@ export interface UserPreferences {
   favourite_drivers: string[];
   favourite_teams: string[];
   theme: 'dark' | 'light';
+}
+
+// Live standings and results from Jolpica (see standingsService).
+export interface DriverStanding {
+  position: number;
+  points: number;
+  wins: number;
+  driverId: string;   // Jolpica id, e.g. "antonelli"
+  id: string;         // app id from DRIVER_CODE_MAP, e.g. "ant"
+  code: string;       // three-letter code, e.g. "ANT"
+  number: number;     // permanent number as reported by Jolpica (0 when absent)
+  name: string;
+  team: string;       // app team name, e.g. "Racing Bulls"
+  color: string;
+}
+
+export interface ConstructorStanding {
+  position: number;
+  points: number;
+  wins: number;
+  constructorId: string;
+  name: string;
+  color: string;
+}
+
+export interface PodiumEntry {
+  code: string;
+  id: string;
+  name: string;
+  team: string;
+  gap: string; // "+0.000" for the winner, "+2.974" or a status such as "+1 Lap"
+}
+
+export interface RoundResult {
+  round: number;
+  raceName: string;
+  date: string;
+  circuitId: string;
+  circuitName: string;
+  winner?: string;
+  winnerTime?: string;
+  podium: PodiumEntry[];
+  fastestLap?: { code: string; id: string; time: string };
 }

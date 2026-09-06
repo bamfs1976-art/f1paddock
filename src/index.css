@@ -7,8 +7,12 @@
   --color-paper-3: #1e1e1e;
   --color-ink: #f5f5f0;
   --color-ink-2: rgba(245, 245, 240, 0.7);
-  --color-ink-3: rgba(245, 245, 240, 0.4);
+  --color-ink-3: rgba(245, 245, 240, 0.55);
+  --color-rule: rgba(245, 245, 240, 0.25);
   --color-racing: #EF0107;
+  --color-racing-fill: #D40006;
+  --color-gain: #22c55e;
+  --color-loss: #f87171;
 
   --color-mercedes: #27F4D2;
   --color-ferrari: #E8002D;
@@ -37,8 +41,12 @@
   --color-paper-3: #1e1e1e;
   --color-ink: #f5f5f0;
   --color-ink-2: rgba(245, 245, 240, 0.7);
-  --color-ink-3: rgba(245, 245, 240, 0.4);
+  --color-ink-3: rgba(245, 245, 240, 0.55);
+  --color-rule: rgba(245, 245, 240, 0.25);
   --color-racing: #EF0107;
+  --color-racing-fill: #D40006;
+  --color-gain: #22c55e;
+  --color-loss: #f87171;
 }
 
 body.light {
@@ -47,8 +55,12 @@ body.light {
   --color-paper-3: #e0e0d4;
   --color-ink: #0a0a0a;
   --color-ink-2: rgba(10, 10, 10, 0.7);
-  --color-ink-3: rgba(10, 10, 10, 0.4);
+  --color-ink-3: rgba(10, 10, 10, 0.6);
+  --color-rule: rgba(10, 10, 10, 0.25);
   --color-racing: #EF0107;
+  --color-racing-fill: #D40006;
+  --color-gain: #166534;
+  --color-loss: #b91c1c;
 }
 
 * { box-sizing: border-box; }
@@ -75,9 +87,10 @@ body {
 .font-serif { font-family: 'Playfair Display', Georgia, serif; }
 .font-mono  { font-family: 'JetBrains Mono', monospace; }
 
+/* Type floor is 12px. Nothing in the interface renders smaller. */
 .label-mono {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   color: var(--color-ink-3);
@@ -85,13 +98,13 @@ body {
 
 .section-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--color-ink-2);
   display: inline-block;
   padding: 4px 10px;
-  border: 1px solid var(--color-ink-3);
+  border: 1px solid var(--color-rule);
   background: var(--color-paper-2);
 }
 
@@ -103,10 +116,21 @@ body {
 .text-ink-3 { color: var(--color-ink-3); }
 .text-racing { color: var(--color-racing); }
 .bg-racing  { background-color: var(--color-racing); }
+/* Filled surfaces which carry text use the deeper red: white on it is 5.52:1. */
+.bg-racing-fill { background-color: var(--color-racing-fill); }
+.text-gain { color: var(--color-gain); }
+.text-loss { color: var(--color-loss); }
+.bg-gain { background-color: var(--color-gain); }
+.bg-loss { background-color: var(--color-loss); }
+.bg-rule { background-color: var(--color-rule); }
 .border-ink { border-color: var(--color-ink); }
 .border-ink-2 { border-color: var(--color-ink-2); }
-.border-ink-3 { border-color: var(--color-ink-3); }
+/* Borders and decorative rules use --color-rule, never ink-3 (which is text). */
+.border-rule { border-color: var(--color-rule); }
+.divide-rule > :not(:last-child) { border-color: var(--color-rule); }
 .border-racing { border-color: var(--color-racing); }
+
+::placeholder { color: var(--color-ink-3); opacity: 1; }
 
 button, a, [role="button"] {
   outline: none;
@@ -124,12 +148,19 @@ button, a, [role="button"] {
   animation: pulse-dot 1.4s ease-in-out infinite;
 }
 
+/* Ticker: one pass on mount, then still. Remounting the element runs another
+   pass. Pointer hover or keyboard focus pauses the pass in progress. */
 @keyframes ticker-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.ticker-scroll {
-  animation: ticker-scroll 60s linear infinite;
+.ticker-once {
+  animation: ticker-scroll 40s linear 1 forwards;
+}
+[role="marquee"]:hover .ticker-once,
+[role="marquee"]:focus-within .ticker-once,
+[role="marquee"]:focus .ticker-once {
+  animation-play-state: paused;
 }
 
 @keyframes scan-sweep {
@@ -166,13 +197,20 @@ button, a, [role="button"] {
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
+/* Hero speed lines: static by default. The hero adds .speed-lines-active for
+   two seconds when the live link first connects and whenever a session
+   enters its live window; the class, not a permanent keyframe, drives them. */
 @keyframes speed-line {
   0% { transform: translateX(-100vw) skewX(-20deg); opacity: 0; }
   10% { opacity: 0.4; }
   100% { transform: translateX(100vw) skewX(-20deg); opacity: 0; }
 }
 .speed-line {
-  animation: speed-line 4s linear infinite;
+  opacity: 0.12;
+  transform: skewX(-20deg);
+}
+.speed-lines-active .speed-line {
+  animation: speed-line 2s linear 1;
 }
 
 .diagonal-bg {
@@ -235,7 +273,7 @@ button, a, [role="button"] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .ticker-scroll, .scan-sweep, .scan-line, .speed-line, .pulse-dot, .typing-dot {
+  .ticker-once, .scan-sweep, .scan-line, .speed-line, .speed-lines-active .speed-line, .pulse-dot, .typing-dot {
     animation: none !important;
   }
 }

@@ -6,6 +6,29 @@
 [functions]
   node_bundler = "esbuild"
 
+# Hashed bundles never change, so browsers may keep them for a year.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The shell must always be revalidated so a deploy is picked up immediately.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+# Single-page app: every path renders index.html.
 [[redirects]]
   from = "/*"
   to = "/index.html"

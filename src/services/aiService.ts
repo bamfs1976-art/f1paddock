@@ -2,6 +2,13 @@ import type { PaddockIntelData, DriverAnalysis } from '../types';
 
 const BASE = '/.netlify/functions';
 
+export class RateLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
+
 export async function fetchPaddockIntel(): Promise<PaddockIntelData | null> {
   try {
     const res = await fetch(`${BASE}/paddock-intel`, { method: 'POST' });
@@ -36,7 +43,11 @@ export async function sendChatMessage(
     body: JSON.stringify({ message, history }),
   });
   if (!res.ok) {
-    if (res.status === 429) throw new Error('RATE_LIMITED');
+    if (res.status === 429) {
+      let message = 'You have used your Paddock AI messages for this hour. Try again later.';
+      try { message = (await res.json()).message || message; } catch { /* keep default */ }
+      throw new RateLimitError(message);
+    }
     return null;
   }
   return res.json();
