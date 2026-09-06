@@ -49,7 +49,7 @@ export default function TelemetryDisplay() {
         <select
           value={driver?.id ?? ''}
           onChange={(e) => setDriverId(e.target.value)}
-          className="bg-paper-2 border border-ink-3 px-3 py-2 font-mono text-xs"
+          className="bg-paper-2 border border-rule px-3 py-2 font-mono text-xs"
           aria-label="Select driver"
         >
           {DRIVERS.map((d) => (
@@ -79,14 +79,14 @@ export default function TelemetryDisplay() {
         </div>
         <div>
           <div className="label-mono">DRS</div>
-          <div className={`font-mono text-2xl font-bold mt-1 ${telemetry?.drs ? 'text-green-500' : 'text-ink-3'}`}>
+          <div className={`font-mono text-2xl font-bold mt-1 ${telemetry?.drs ? 'text-gain' : 'text-ink-3'}`}>
             {telemetry?.drs ? 'OPEN' : 'CLOSED'}
           </div>
         </div>
         <div className="col-span-2">
           <div className="label-mono mb-1">THROTTLE</div>
           <div className="h-3 bg-paper-3">
-            <div className="h-full bg-green-500 transition-all duration-200" style={{ width: `${telemetry?.throttle ?? 0}%` }} />
+            <div className="h-full bg-gain transition-all duration-200" style={{ width: `${telemetry?.throttle ?? 0}%` }} />
           </div>
         </div>
         <div className="col-span-2">
@@ -97,7 +97,7 @@ export default function TelemetryDisplay() {
         </div>
       </div>
       {!telemetry && (
-        <div className="border border-dashed border-ink-3 p-3 mt-3 label-mono text-ink-3">
+        <div className="border border-dashed border-rule p-3 mt-3 label-mono text-ink-3">
           NO LIVE SESSION ACTIVE · SHOWING SIMULATED DATA
         </div>
       )}

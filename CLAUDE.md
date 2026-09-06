@@ -87,8 +87,13 @@ or simulated numbers are never displayed.
   near-black paper, racing red, numbered sections, ticker. Do not introduce a
   new visual style or palette.
 - Type floor is 12px. `.label-mono` is 12px, `.section-label` is 13px.
-- `--color-ink-3` is body-level secondary text (55 percent opacity). Borders and
-  decorative rules use `--color-rule` (25 percent opacity), never `ink-3`.
+- `--color-ink-3` is secondary text: 55 percent opacity on dark (5.80:1), 60
+  percent on light (5.11:1). Borders and decorative rules use `--color-rule`
+  (25 percent opacity), never `ink-3`.
+- `--color-racing` (#EF0107) measures 4.41:1 on dark and 4.11:1 on light, so
+  filled elements which carry text use `--color-racing-fill` (#D40006, white
+  on it 5.52:1). Position arrows use `--color-gain` and `--color-loss`, which
+  differ per theme.
 - Team colours are never used as text colour on light paper. Use a 4px leading
   bar or a filled chip with ink text.
 - Racing red is used as text only at 18px and above, or bold at 14px and above.

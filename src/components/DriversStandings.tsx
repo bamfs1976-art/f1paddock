@@ -57,7 +57,7 @@ export default function DriversStandings({ liveSync }: Props) {
           <h2 id="drivers-heading" className="font-serif text-3xl mt-3">
             Drivers' Standings
             {liveSync && (
-              <span className="ml-3 inline-flex items-center gap-1.5 align-middle text-xs label-mono text-racing">
+              <span className="ml-3 inline-flex items-center gap-1.5 align-middle label-mono text-ink">
                 <span className="inline-block w-2 h-2 bg-racing rounded-full pulse-dot" aria-hidden="true" /> LIVE
               </span>
             )}
@@ -69,7 +69,7 @@ export default function DriversStandings({ liveSync }: Props) {
         {selected.length === 2 && (
           <button
             onClick={() => setShowCompare(true)}
-            className="bg-racing text-white px-4 py-2 font-mono text-xs btn-press flex items-center gap-2"
+            className="bg-racing-fill text-white px-4 py-2 font-mono text-xs btn-press flex items-center gap-2"
             aria-label="Compare selected drivers"
           >
             <GitCompare size={14} aria-hidden="true" />
@@ -79,7 +79,7 @@ export default function DriversStandings({ liveSync }: Props) {
       </div>
 
       <div className="border-2 border-ink bg-paper-2" role="table" aria-live="polite" aria-busy={loading}>
-        <div className="grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2 border-b border-ink-3 label-mono">
+        <div className="grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2 border-b border-rule label-mono">
           <div>POS</div>
           <div aria-label="Position change">Δ</div>
           <div aria-label="Select for comparison"></div>
@@ -103,7 +103,7 @@ export default function DriversStandings({ liveSync }: Props) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.03, duration: 0.3 }}
-                  className={`hover-bar grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-ink-3/40 ${isFav ? 'bg-paper-3/40' : ''}`}
+                  className={`hover-bar grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-rule ${isFav ? 'bg-paper-3/40' : ''}`}
                 >
                   <div className="font-mono font-bold tabular-nums">{d.pos}</div>
                   <div><PositionChangeIndicator change={d.posChange ?? 0} /></div>
@@ -121,11 +121,11 @@ export default function DriversStandings({ liveSync }: Props) {
                   <div className="font-mono font-bold">{d.code}</div>
                   <button
                     onClick={() => setProfile(d)}
-                    className="text-left truncate hover:text-racing transition-colors"
+                    className="text-left truncate hover:underline decoration-racing decoration-2 underline-offset-4"
                     aria-label={`View profile for ${d.name}`}
                   >
                     {d.name}
-                    <span className="sm:hidden block text-[10px] text-ink-3">{d.team}</span>
+                    <span className="sm:hidden block text-xs text-ink-3">{d.team}</span>
                   </button>
                   <div className="hidden sm:block text-ink-2 text-xs truncate">{d.team}</div>
                   <div className="text-right flex items-center justify-end gap-2">

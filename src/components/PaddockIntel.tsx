@@ -52,7 +52,7 @@ export default function PaddockIntel() {
         <button
           onClick={refresh}
           disabled={loading}
-          className="bg-paper-2 border border-ink-3 px-3 py-2 font-mono text-xs btn-press flex items-center gap-2 disabled:opacity-50"
+          className="bg-paper-2 border border-rule px-3 py-2 font-mono text-xs btn-press flex items-center gap-2 disabled:opacity-50"
           aria-label="Refresh paddock intel"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden="true" />
@@ -84,7 +84,7 @@ export default function PaddockIntel() {
       <div className="grid gap-4 md:grid-cols-2">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
-              <article key={i} className="border border-ink-3 bg-paper-2 p-4 space-y-2">
+              <article key={i} className="border border-rule bg-paper-2 p-4 space-y-2">
                 <SkeletonLoader type="bar" width="60px" />
                 <SkeletonLoader type="text" />
                 <SkeletonLoader type="text" count={3} />
@@ -96,7 +96,7 @@ export default function PaddockIntel() {
               return (
                 <article
                   key={item.id}
-                  className={`border ${lead ? 'border-racing md:col-span-2' : 'border-ink-3'} bg-paper-2 p-4 card-lift cursor-pointer`}
+                  className={`border ${lead ? 'border-racing md:col-span-2' : 'border-rule'} bg-paper-2 p-4 card-lift cursor-pointer`}
                   onClick={() => setExpanded(isOpen ? null : item.id)}
                 >
                   <span className="inline-block label-mono px-2 py-0.5 bg-paper-3 text-ink mb-3">{item.kicker}</span>

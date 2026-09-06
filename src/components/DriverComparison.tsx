@@ -88,33 +88,33 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
         className="bg-paper border-2 border-ink max-w-4xl w-full my-8"
       >
-        <header className="flex items-center justify-between px-6 py-4 border-b border-ink-3">
+        <header className="flex items-center justify-between px-6 py-4 border-b border-rule">
           <h2 id="compare-title" className="font-serif text-2xl">
             <span className="label-mono mr-3">TELEMETRY COMPARISON</span>
             {codeA} <span className="text-ink-3">vs</span> {codeB}
           </h2>
-          <button ref={closeRef} onClick={onClose} className="p-2 border border-ink-3 btn-press" aria-label="Close comparison">
+          <button ref={closeRef} onClick={onClose} className="p-2 border border-rule btn-press" aria-label="Close comparison">
             <X size={16} aria-hidden="true" />
           </button>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2">
           {[driverA, driverB].map((d) => (
-            <div key={d.id} className="p-6 border-r border-ink-3 last:border-r-0">
+            <div key={d.id} className="p-6 border-r border-rule last:border-r-0">
               <div className="h-1 mb-3" style={{ background: d.color }} aria-hidden="true" />
               <div className="label-mono">{d.country} · #{d.number}</div>
               <h3 className="font-serif text-2xl mt-1">{d.name}</h3>
               <p className="text-sm text-ink-2">{d.team}</p>
               <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                <div className="border border-ink-3 p-2"><div className="font-bold">{d.pts}</div><div className="label-mono">PTS</div></div>
-                <div className="border border-ink-3 p-2"><div className="font-bold">P{d.pos}</div><div className="label-mono">POS</div></div>
-                <div className="border border-ink-3 p-2"><div className="font-bold">{d.careerStats?.wins || 0}</div><div className="label-mono">WINS</div></div>
+                <div className="border border-rule p-2"><div className="font-bold">{d.pts}</div><div className="label-mono">PTS</div></div>
+                <div className="border border-rule p-2"><div className="font-bold">P{d.pos}</div><div className="label-mono">POS</div></div>
+                <div className="border border-rule p-2"><div className="font-bold">{d.careerStats?.wins || 0}</div><div className="label-mono">WINS</div></div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="p-6 border-t border-ink-3 space-y-4">
+        <div className="p-6 border-t border-rule space-y-4">
           {loading ? (
             <>
               <SkeletonLoader type="bar" count={4} />
@@ -131,7 +131,7 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
         </div>
 
         {!loading && (
-          <div className="p-6 border-t border-ink-3 bg-paper-2">
+          <div className="p-6 border-t border-rule bg-paper-2">
             <div className="label-mono mb-2">AI VERDICT</div>
             <p className="font-serif italic text-base mb-3">{data.verdict}</p>
             <p className="text-sm text-ink-2 leading-relaxed">{data.summary}</p>

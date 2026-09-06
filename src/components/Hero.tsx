@@ -56,7 +56,7 @@ export default function Hero({ weather, liveStatus }: Props) {
         <div className="flex items-center justify-between">
           <span className="label-mono">{nowLabel(now)}</span>
           {liveStatus && (
-            <span className="label-mono text-racing flex items-center gap-2">
+            <span className="label-mono text-ink flex items-center gap-2">
               <span className="inline-block w-2 h-2 bg-racing rounded-full pulse-dot" />
               {liveStatus}
             </span>

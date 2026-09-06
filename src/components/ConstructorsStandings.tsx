@@ -36,7 +36,7 @@ export default function ConstructorsStandings() {
       <h2 id="teams-heading" className="font-serif text-3xl mt-3 mb-6">Constructors' Standings</h2>
 
       <div className="border-2 border-ink bg-paper-2" role="table" aria-busy={loading}>
-        <div className="grid grid-cols-[40px_30px_4px_1fr_70px_60px_70px] sm:grid-cols-[50px_40px_4px_1fr_120px_80px_80px] gap-2 px-3 py-2 border-b border-ink-3 label-mono">
+        <div className="grid grid-cols-[40px_30px_4px_1fr_70px_60px_70px] sm:grid-cols-[50px_40px_4px_1fr_120px_80px_80px] gap-2 px-3 py-2 border-b border-rule label-mono">
           <div>POS</div><div aria-label="Position change">Δ</div><div></div>
           <div>TEAM</div><div className="hidden sm:block">ENGINE</div>
           <div className="text-center">FAV</div>
@@ -55,7 +55,7 @@ export default function ConstructorsStandings() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.04, duration: 0.3 }}
-                  className={`hover-bar grid grid-cols-[40px_30px_4px_1fr_70px_60px_70px] sm:grid-cols-[50px_40px_4px_1fr_120px_80px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-ink-3/40 ${isFav ? 'bg-paper-3/40' : ''}`}
+                  className={`hover-bar grid grid-cols-[40px_30px_4px_1fr_70px_60px_70px] sm:grid-cols-[50px_40px_4px_1fr_120px_80px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-rule ${isFav ? 'bg-paper-3/40' : ''}`}
                 >
                   <div className="font-mono font-bold tabular-nums">{t.pos}</div>
                   <div><PositionChangeIndicator change={t.posChange ?? 0} /></div>
@@ -63,7 +63,7 @@ export default function ConstructorsStandings() {
                   <div className="truncate">
                     <span className="mr-2" aria-hidden="true">{t.country}</span>
                     <span className="font-bold">{t.name}</span>
-                    <span className="sm:hidden block text-[10px] text-ink-3">{t.engine}</span>
+                    <span className="sm:hidden block text-xs text-ink-3">{t.engine}</span>
                   </div>
                   <div className="hidden sm:block text-ink-2 text-xs truncate">{t.engine}</div>
                   <div className="text-center">

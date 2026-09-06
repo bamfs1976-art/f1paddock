@@ -10,7 +10,7 @@ export default function SessionCountdown() {
 
   if (!rounds) {
     return (
-      <div className="border border-ink-3 bg-paper-2 p-4 label-mono text-ink-3" aria-busy={schedule.status === 'loading'}>
+      <div className="border border-rule bg-paper-2 p-4 label-mono text-ink-3" aria-busy={schedule.status === 'loading'}>
         {schedule.status === 'loading' ? 'LOADING SCHEDULE…' : 'SCHEDULE UNAVAILABLE'}
       </div>
     );
@@ -28,13 +28,13 @@ export default function SessionCountdown() {
 
   const upcoming = findUpcomingSession(rounds, now);
   if (!upcoming) {
-    return <div className="border border-ink-3 bg-paper-2 p-4 label-mono text-ink-3">SEASON COMPLETE</div>;
+    return <div className="border border-rule bg-paper-2 p-4 label-mono text-ink-3">SEASON COMPLETE</div>;
   }
 
   const c = countdownTo(upcoming.session.dateStart, now);
 
   return (
-    <div className="border border-ink-3 bg-paper-2 p-4">
+    <div className="border border-rule bg-paper-2 p-4">
       <div className="label-mono mb-2">NEXT SESSION · {upcoming.session.name.toUpperCase()} · {fmtDayTime(upcoming.session.dateStart).toUpperCase()}</div>
       <div className="flex gap-4 font-mono text-2xl tabular-nums" aria-label={`${c.days} days ${c.hours} hours ${c.minutes} minutes`}>
         <span><span className="font-bold">{c.days}</span><span className="text-ink-3 text-xs ml-1">d</span></span>

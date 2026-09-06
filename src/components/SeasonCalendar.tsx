@@ -30,7 +30,7 @@ function RaceCard({ race, result, isNext, isDone }: CardProps) {
   const [open, setOpen] = useState(false);
   const [compounds, setCompounds] = useState<string[] | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const borderClass = isNext ? 'border-racing' : isDone ? 'border-ink-3' : 'border-ink-3/40';
+  const borderClass = isNext ? 'border-racing' : isDone ? 'border-rule' : 'border-rule';
   const raceSessionKey = race.sessions.find((s) => s.name === 'Race' && s.sessionKey)?.sessionKey;
 
   // Tyre compounds and conditions come from OpenF1 for the race session, fetched
@@ -69,8 +69,8 @@ function RaceCard({ race, result, isNext, isDone }: CardProps) {
             <span className="label-mono">R{String(race.round).padStart(2, '0')}</span>
             <span className="text-2xl" aria-hidden="true">{race.flag}</span>
             <span className="label-mono text-ink-2">{fmtShortDate(race.date)}</span>
-            {race.isSprint && <span className="label-mono border border-ink-3 px-1.5 py-0.5">SPRINT</span>}
-            {isNext && <span className="label-mono bg-racing text-white px-2 py-0.5">NEXT</span>}
+            {race.isSprint && <span className="label-mono border border-rule px-1.5 py-0.5">SPRINT</span>}
+            {isNext && <span className="label-mono bg-racing-fill text-white px-2 py-0.5">NEXT</span>}
             {isDone && <span className="label-mono text-ink-3">COMPLETED</span>}
           </div>
           <h3 className="font-serif text-lg leading-tight truncate">{race.name}</h3>
@@ -92,7 +92,7 @@ function RaceCard({ race, result, isNext, isDone }: CardProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-ink-3"
+            className="overflow-hidden border-t border-rule"
           >
             <div className="p-4 space-y-3">
               <div>
@@ -109,18 +109,18 @@ function RaceCard({ race, result, isNext, isDone }: CardProps) {
                 </div>
               </div>
               {result.fastestLap && (
-                <div className="border-t border-ink-3/40 pt-2">
+                <div className="border-t border-rule pt-2">
                   <div className="label-mono mb-1">FASTEST LAP</div>
                   <div className="font-mono text-sm">{result.fastestLap.code} · {result.fastestLap.time}</div>
                 </div>
               )}
               {(race.laps || race.distance) && (
-                <div className="border-t border-ink-3/40 pt-2 label-mono">
+                <div className="border-t border-rule pt-2 label-mono">
                   {race.laps ? `${race.laps} LAPS` : ''}{race.laps && race.distance ? ' · ' : ''}{race.distance?.toUpperCase() || ''}
                 </div>
               )}
               {raceSessionKey && (
-                <div className="border-t border-ink-3/40 pt-2">
+                <div className="border-t border-rule pt-2">
                   <div className="label-mono mb-1">TYRE COMPOUNDS</div>
                   {compounds === null ? (
                     <SkeletonLoader type="bar" width="80px" />
@@ -134,7 +134,7 @@ function RaceCard({ race, result, isNext, isDone }: CardProps) {
                 </div>
               )}
               {weather && (
-                <div className="border-t border-ink-3/40 pt-2 label-mono">
+                <div className="border-t border-rule pt-2 label-mono">
                   CONDITIONS · {weather.rainfall > 0 ? 'WET' : 'DRY'} · AIR {Math.round(weather.air_temperature)}°C · TRACK {Math.round(weather.track_temperature)}°C
                 </div>
               )}

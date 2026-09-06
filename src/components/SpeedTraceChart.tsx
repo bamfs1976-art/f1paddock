@@ -64,21 +64,26 @@ export default function SpeedTraceChart({ driverIds }: Props) {
   }
   if (!rows.length) {
     return (
-      <div className="border border-dashed border-ink-3 p-6 label-mono text-ink-3">
+      <div className="border border-dashed border-rule p-6 label-mono text-ink-3">
         NO LAP DATA AVAILABLE FOR THIS SESSION
       </div>
     );
   }
 
   return (
-    <div className="border border-ink-3 bg-paper-2 p-3 h-[300px]">
+    <div className="border border-rule bg-paper-2 p-3 h-[300px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={rows}>
-          <CartesianGrid stroke="rgba(245,245,240,0.1)" />
-          <XAxis dataKey="lap" stroke="rgba(245,245,240,0.6)" tick={{ fontSize: 10 }} />
-          <YAxis stroke="rgba(245,245,240,0.6)" tick={{ fontSize: 10 }} domain={['dataMin - 0.5', 'dataMax + 0.5']} />
-          <Tooltip contentStyle={{ background: 'var(--color-paper-3)', border: '1px solid var(--color-ink-3)', fontSize: 12 }} />
-          <Legend wrapperStyle={{ fontSize: 11 }} />
+          <CartesianGrid stroke="var(--color-rule)" />
+          <XAxis dataKey="lap" stroke="var(--color-ink-2)" tick={{ fontSize: 12, fill: 'var(--color-ink-2)' }} />
+          <YAxis stroke="var(--color-ink-2)" tick={{ fontSize: 12, fill: 'var(--color-ink-2)' }} domain={['dataMin - 0.5', 'dataMax + 0.5']} />
+          <Tooltip
+            contentStyle={{ background: 'var(--color-paper-3)', border: '1px solid var(--color-rule)', fontSize: 12 }}
+            labelStyle={{ color: 'var(--color-ink)' }}
+            itemStyle={{ color: 'var(--color-ink)' }}
+          />
+          {/* Team colours stay on the lines; legend text is ink so it reads on light paper. */}
+          <Legend wrapperStyle={{ fontSize: 12 }} formatter={(value) => <span style={{ color: 'var(--color-ink)' }}>{value}</span>} />
           {drivers.map((d) => (
             <Line
               key={d.id}

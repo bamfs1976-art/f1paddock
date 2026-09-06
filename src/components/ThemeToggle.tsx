@@ -36,7 +36,7 @@ export default function ThemeToggle({ theme, onToggle }: Props) {
   return (
     <button
       onClick={handle}
-      className="fixed top-4 right-4 z-50 bg-paper-2 border border-ink-3 p-2 btn-press hover:border-ink"
+      className="fixed top-4 right-4 z-50 bg-paper-2 border border-rule p-2 btn-press hover:border-ink"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       title="Toggle theme"
     >

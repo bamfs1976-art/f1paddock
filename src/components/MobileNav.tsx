@@ -28,12 +28,12 @@ export default function MobileNav({ active, onChange, liveActive }: Props) {
           <button
             key={id}
             onClick={() => onChange(id)}
-            className={`relative py-2 flex flex-col items-center gap-1 ${isActive ? 'text-racing' : 'text-ink-2'}`}
+            className={`relative py-2 flex flex-col items-center gap-1 ${isActive ? 'text-ink' : 'text-ink-2'}`}
             aria-current={isActive ? 'page' : undefined}
             aria-label={label}
           >
-            <Icon size={18} aria-hidden="true" />
-            <span className="label-mono text-[9px]">{label.toUpperCase()}</span>
+            <Icon size={18} className={isActive ? 'text-racing' : undefined} aria-hidden="true" />
+            <span className="label-mono">{label.toUpperCase()}</span>
             {id === 'live' && liveActive && (
               <span className="absolute top-1 right-4 w-2 h-2 bg-racing rounded-full pulse-dot" aria-hidden="true" />
             )}

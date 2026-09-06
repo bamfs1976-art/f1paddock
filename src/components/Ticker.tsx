@@ -35,7 +35,8 @@ export default function Ticker() {
       <div className="flex ticker-scroll whitespace-nowrap py-2">
         {repeated.map((item, i) => (
           <span key={i} className="font-mono text-xs px-4 flex items-center gap-2">
-            <span className="text-racing font-bold">{item.sym}</span>
+            <span className="inline-block w-1.5 h-1.5 bg-racing" aria-hidden="true" />
+            <span className="font-bold">{item.sym}</span>
             <span>{item.val}</span>
             <span className="text-ink-3">·</span>
             <span className="text-ink-2">{item.pts}</span>

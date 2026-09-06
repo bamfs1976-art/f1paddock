@@ -38,8 +38,8 @@ export default function CircuitMap({ circuitId, width = 80, height = 50, label }
   if (!path) {
     return (
       <div
-        className="flex items-center justify-center border border-dashed border-ink-3 text-ink-3 label-mono"
-        style={{ width, height, fontSize: 8 }}
+        className="flex items-center justify-center border border-dashed border-rule text-ink-3 label-mono"
+        style={{ width, height, fontSize: 12 }}
         role="img"
         aria-label={label || 'circuit map unavailable'}
       >

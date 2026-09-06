@@ -73,7 +73,7 @@ export default function AIChat({ open, onOpen, onClose, fullScreen }: Props) {
     return (
       <button
         onClick={onOpen}
-        className="hidden md:flex fixed bottom-6 right-6 z-40 bg-racing text-white p-4 rounded-full shadow-lg btn-press items-center gap-2"
+        className="hidden md:flex fixed bottom-6 right-6 z-40 bg-racing-fill text-white p-4 rounded-full shadow-lg btn-press items-center gap-2"
         aria-label="Open Paddock AI chat"
       >
         <MessageSquare size={18} aria-hidden="true" />
@@ -98,7 +98,7 @@ export default function AIChat({ open, onOpen, onClose, fullScreen }: Props) {
         aria-modal="true"
         aria-labelledby="chat-title"
       >
-        <header className="flex items-center justify-between px-4 py-3 border-b border-ink-3 bg-paper-2">
+        <header className="flex items-center justify-between px-4 py-3 border-b border-rule bg-paper-2">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-racing rounded-full pulse-dot" aria-hidden="true" />
             <h3 id="chat-title" className="font-serif text-lg">Paddock AI</h3>
@@ -117,7 +117,7 @@ export default function AIChat({ open, onOpen, onClose, fullScreen }: Props) {
                   <button
                     key={s}
                     onClick={() => submit(s)}
-                    className="w-full text-left p-3 border border-ink-3 bg-paper-2 hover:border-racing text-sm btn-press"
+                    className="w-full text-left p-3 border border-rule bg-paper-2 hover:border-racing text-sm btn-press"
                   >
                     {s}
                   </button>
@@ -133,7 +133,7 @@ export default function AIChat({ open, onOpen, onClose, fullScreen }: Props) {
               <div
                 className={`max-w-[85%] px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === 'user'
-                    ? 'bg-paper-3 border border-ink-3 text-ink'
+                    ? 'bg-paper-3 border border-rule text-ink'
                     : 'bg-paper-2 border-l-2 border-racing text-ink'
                 }`}
               >
@@ -151,24 +151,24 @@ export default function AIChat({ open, onOpen, onClose, fullScreen }: Props) {
             </div>
           )}
           {error && (
-            <div className="text-xs text-racing border border-racing/50 p-2" role="alert">{error}</div>
+            <div className="text-xs text-ink border-l-2 border-racing bg-paper-2 p-2" role="alert">{error}</div>
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="border-t border-ink-3 p-3 flex gap-2 bg-paper-2">
+        <form onSubmit={handleSubmit} className="border-t border-rule p-3 flex gap-2 bg-paper-2">
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask anything about Formula 1…"
-            className="flex-1 bg-paper border border-ink-3 px-3 py-2 text-sm focus:border-racing"
+            className="flex-1 bg-paper border border-rule px-3 py-2 text-sm focus:border-racing"
             aria-label="Chat message"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="bg-racing text-white px-4 py-2 btn-press disabled:opacity-50"
+            className="bg-racing-fill text-white px-4 py-2 btn-press disabled:opacity-50"
             aria-label="Send message"
           >
             <Send size={16} aria-hidden="true" />

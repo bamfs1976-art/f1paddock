@@ -124,7 +124,7 @@ export default function TechnicalBrief() {
             <p className="text-sm text-ink-2 leading-relaxed mb-4">{c.body}</p>
             <div className="grid grid-cols-2 gap-2">
               {c.stats.map((s) => (
-                <div key={s.label} className="border border-ink-3 px-2 py-1.5">
+                <div key={s.label} className="border border-rule px-2 py-1.5">
                   <div className="label-mono">{s.label}</div>
                   <div className="font-mono text-sm font-bold">{s.value}</div>
                 </div>
@@ -144,7 +144,7 @@ export default function TechnicalBrief() {
           aria-hidden="true"
         />
         {scanning && (
-          <div className="absolute left-0 right-0 h-[2px] bg-green-400 scan-line" aria-hidden="true" />
+          <div className="absolute left-0 right-0 h-[2px] bg-gain scan-line" aria-hidden="true" />
         )}
         <div className="relative flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -154,13 +154,13 @@ export default function TechnicalBrief() {
           <button
             onClick={startScan}
             disabled={scanning}
-            className="bg-racing text-white px-4 py-2 font-mono text-xs btn-press disabled:opacity-60"
+            className="bg-racing-fill text-white px-4 py-2 font-mono text-xs btn-press disabled:opacity-60"
           >
             {scanning ? 'SCANNING…' : 'SCAN SYSTEM'}
           </button>
         </div>
         <div className="relative h-2 bg-paper-3 mt-4">
-          <div className="h-full bg-green-500 transition-all" style={{ width: `${progress}%` }} />
+          <div className="h-full bg-gain transition-all" style={{ width: `${progress}%` }} />
         </div>
         {scanned && telemetry && (
           <div className="relative grid grid-cols-3 gap-3 mt-4 font-mono text-sm">

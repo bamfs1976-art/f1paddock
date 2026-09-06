@@ -18,8 +18,8 @@ interface Props {
 type SessionStatus = 'upcoming' | 'live' | 'completed';
 
 const STATUS_BADGE: Record<SessionStatus, string> = {
-  upcoming: 'border border-ink-3 text-ink-2',
-  live: 'bg-racing text-white',
+  upcoming: 'border border-rule text-ink-2',
+  live: 'bg-racing-fill text-white',
   completed: 'bg-paper-3 text-ink-2',
 };
 
@@ -50,7 +50,7 @@ export default function RaceWeekendHub({ liveSync }: Props) {
               : <p className="label-mono text-ink-3">{schedule.status === 'unavailable' ? 'SCHEDULE UNAVAILABLE' : 'SEASON COMPLETE'}</p>}
           </div>
         ) : (
-          <div className="p-4 sm:p-6 border-b border-ink-3 flex items-start justify-between gap-4 flex-wrap">
+          <div className="p-4 sm:p-6 border-b border-rule flex items-start justify-between gap-4 flex-wrap">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-3xl" aria-hidden="true">{next.flag}</span>
@@ -63,22 +63,22 @@ export default function RaceWeekendHub({ liveSync }: Props) {
           </div>
         )}
 
-        <div className="p-4 sm:p-6 grid sm:grid-cols-2 gap-4 border-b border-ink-3">
+        <div className="p-4 sm:p-6 grid sm:grid-cols-2 gap-4 border-b border-rule">
           <SessionCountdown />
           <WeatherBar weather={liveSync?.weather ?? null} />
         </div>
 
         {next && next.sessions.length > 0 && (
-          <div className="p-4 sm:p-6 border-b border-ink-3">
+          <div className="p-4 sm:p-6 border-b border-rule">
             <div className="label-mono mb-3">SESSION SCHEDULE · TIMES IN YOUR ZONE</div>
             <ul className="grid sm:grid-cols-2 gap-2">
               {next.sessions.map((s) => {
                 const status = sessionStatus(s, now);
                 return (
-                  <li key={s.name + s.dateStart} className="flex items-center justify-between gap-2 text-sm border border-ink-3 px-3 py-2">
+                  <li key={s.name + s.dateStart} className="flex items-center justify-between gap-2 text-sm border border-rule px-3 py-2">
                     <span className="font-mono">{s.name}</span>
                     <span className="text-ink-2 text-xs">{fmtDayTime(s.dateStart)}</span>
-                    <span className={`font-mono text-[10px] uppercase px-2 py-0.5 ${STATUS_BADGE[status]}`}>{status}</span>
+                    <span className={`font-mono text-xs uppercase px-2 py-0.5 ${STATUS_BADGE[status]}`}>{status}</span>
                   </li>
                 );
               })}
@@ -101,12 +101,12 @@ export default function RaceWeekendHub({ liveSync }: Props) {
         </div>
 
         {liveSync?.pitStops && liveSync.pitStops.length > 0 && (
-          <div className="p-4 sm:p-6 border-t border-ink-3">
+          <div className="p-4 sm:p-6 border-t border-rule">
             <div className="label-mono mb-3">PIT STOP LOG</div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm" aria-label="Pit stop log">
                 <thead>
-                  <tr className="label-mono text-left border-b border-ink-3">
+                  <tr className="label-mono text-left border-b border-rule">
                     <th className="py-1 px-2">DRIVER</th>
                     <th className="py-1 px-2">LAP</th>
                     <th className="py-1 px-2">DURATION</th>
@@ -114,7 +114,7 @@ export default function RaceWeekendHub({ liveSync }: Props) {
                 </thead>
                 <tbody>
                   {liveSync.pitStops.slice(-10).reverse().map((p, i) => (
-                    <tr key={i} className="border-b border-ink-3/30">
+                    <tr key={i} className="border-b border-rule">
                       <td className="py-1.5 px-2 font-mono">{p.driverCode.toUpperCase()}</td>
                       <td className="py-1.5 px-2 font-mono">{p.lap}</td>
                       <td className="py-1.5 px-2 font-mono tabular-nums">{p.duration?.toFixed(2) ?? '--'}s</td>
