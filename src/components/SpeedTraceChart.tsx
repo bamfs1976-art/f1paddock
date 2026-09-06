@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { getLapData } from '../services/f1Service';
-import { DRIVERS } from '../constants';
 import type { LapData } from '../types';
+import { useDrivers } from '../services/seasonStore';
 
 interface Props {
   driverIds?: string[];
@@ -13,15 +13,23 @@ interface Row {
   [code: string]: number | null | undefined;
 }
 
-export default function SpeedTraceChart({ driverIds = [DRIVERS[0].id, DRIVERS[1].id] }: Props) {
+export default function SpeedTraceChart({ driverIds }: Props) {
+  const { drivers: DRIVERS, status } = useDrivers();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const ids = useMemo(
+    () => driverIds ?? DRIVERS.slice(0, 2).map((d) => d.id),
+    // Only re-derive when the top two actually change, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [driverIds, DRIVERS[0]?.id, DRIVERS[1]?.id]
+  );
 
   useEffect(() => {
+    if (status === 'loading') return;
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const drivers = driverIds.map((id) => DRIVERS.find((d) => d.id === id)!).filter(Boolean);
+      const drivers = ids.map((id) => DRIVERS.find((d) => d.id === id)!).filter(Boolean);
       const lapsByDriver: Record<string, LapData[]> = {};
       await Promise.all(
         drivers.map(async (d) => {
@@ -46,9 +54,10 @@ export default function SpeedTraceChart({ driverIds = [DRIVERS[0].id, DRIVERS[1]
       }
     })();
     return () => { cancelled = true; };
-  }, [driverIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ids, status]);
 
-  const drivers = driverIds.map((id) => DRIVERS.find((d) => d.id === id)!).filter(Boolean);
+  const drivers = ids.map((id) => DRIVERS.find((d) => d.id === id)!).filter(Boolean);
 
   if (loading) {
     return <div className="label-mono text-ink-3 p-4">LOADING LAP DATA…</div>;

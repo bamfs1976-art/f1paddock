@@ -1,4 +1,5 @@
-import type { LiveSyncState, WeatherData, TelemetryData, LapData, RaceControlMessage, PitStop } from '../types';
+import type { LiveSyncState, WeatherData, TelemetryData, LapData, RaceControlMessage, PitStop, Stint } from '../types';
+import { recordFreshness } from './proxyClient';
 import { DRIVER_NUMBER_MAP } from '../constants';
 
 // Use the Netlify Function proxy in production (server-side caches OpenF1 responses
@@ -25,7 +26,7 @@ let lastPositions: { driver_number: number; position: number }[] = [];
 let syncInFlight: Promise<LiveSyncState | null> | null = null;
 let backoffUntil = 0;
 
-async function safeFetchUrl<T>(url: string): Promise<T | null> {
+async function safeFetchUrl<T>(url: string, key?: string): Promise<T | null> {
   if (Date.now() < backoffUntil) return null;
   try {
     const res = await fetch(url);
@@ -39,6 +40,7 @@ async function safeFetchUrl<T>(url: string): Promise<T | null> {
       return null;
     }
     if (!res.ok) return null;
+    if (key) recordFreshness(key, res.headers.get('X-Cache'), res.headers.get('X-Cache-Timestamp'));
     return (await res.json()) as T;
   } catch {
     return null;
@@ -47,12 +49,30 @@ async function safeFetchUrl<T>(url: string): Promise<T | null> {
 
 async function safeFetch<T>(path: string, query = ''): Promise<T | null> {
   // Try proxy first; safeFetchUrl flips useDirect=true on 404 so we can retry direct.
-  const first = await safeFetchUrl<T>(buildUrl(path, query));
+  const key = `openf1:${path}`;
+  const first = await safeFetchUrl<T>(buildUrl(path, query), key);
   if (first !== null) return first;
   if (useDirect) {
-    return safeFetchUrl<T>(buildUrl(path, query));
+    return safeFetchUrl<T>(buildUrl(path, query), key);
   }
   return null;
+}
+
+/** Generic OpenF1 read through the proxy. Returns null on any failure. */
+export function fetchOpenF1<T>(path: string, query = ''): Promise<T | null> {
+  return safeFetch<T>(path, query);
+}
+
+/** Tyre stints for a session, used for compound badges on completed rounds. */
+export async function getStints(sessionKey: number): Promise<Stint[]> {
+  const data = await safeFetch<Stint[]>('stints', `session_key=${sessionKey}`);
+  return data || [];
+}
+
+/** Final weather reading of a session. */
+export async function getSessionWeather(sessionKey: number): Promise<WeatherData | null> {
+  const data = await safeFetch<WeatherData[]>('weather', `session_key=${sessionKey}`);
+  return data && data.length ? data[data.length - 1] : null;
 }
 
 export function isRateLimited(): boolean {

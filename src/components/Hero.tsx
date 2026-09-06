@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { CALENDAR } from '../constants';
 import type { WeatherData } from '../types';
+import { useSchedule } from '../services/seasonStore';
+import { findLiveSession, findUpcomingSession } from '../services/scheduleService';
+import { countdownTo } from '../utils/time';
 
 function greeting() {
   const h = new Date().getHours();
@@ -16,17 +18,6 @@ function nowLabel(d: Date) {
     .replace(/,/g, ' .');
 }
 
-function nextSession() {
-  const next = CALENDAR.find((r) => r.isNext) || CALENDAR.find((r) => !r.isDone);
-  if (!next) return null;
-  const target = new Date(next.date + 'T15:00:00Z');
-  const diff = target.getTime() - Date.now();
-  if (diff < 0) return { label: 'RACE LIVE', country: next.country };
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  return { label: `RACE . ${next.country.toUpperCase()} GP . in ${days}d ${hours}h`, country: next.country };
-}
-
 interface Props {
   weather?: WeatherData | null;
   liveStatus?: string | null;
@@ -38,7 +29,18 @@ export default function Hero({ weather, liveStatus }: Props) {
     const t = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(t);
   }, []);
-  const session = nextSession();
+  const schedule = useSchedule();
+  let sessionLabel: string | null = null;
+  if (schedule.data) {
+    const live = findLiveSession(schedule.data, now.getTime());
+    const upcoming = findUpcomingSession(schedule.data, now.getTime());
+    if (live) {
+      sessionLabel = `LIVE . ${live.round.name.toUpperCase()} . ${live.session.name.toUpperCase()}`;
+    } else if (upcoming) {
+      const c = countdownTo(upcoming.session.dateStart, now.getTime());
+      sessionLabel = `${upcoming.session.name.toUpperCase()} . ${upcoming.round.name.toUpperCase()} . in ${c.days}d ${c.hours}h`;
+    }
+  }
   return (
     <section className="diagonal-bg border-b-2 border-ink py-10 px-6 sm:px-10 relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-30">
@@ -64,8 +66,8 @@ export default function Hero({ weather, liveStatus }: Props) {
           {greeting()},<br />
           <span className="text-ink-2">welcome to the paddock.</span>
         </h1>
-        {session && (
-          <p className="label-mono text-ink">{session.label}</p>
+        {sessionLabel && (
+          <p className="label-mono text-ink">{sessionLabel}</p>
         )}
         {weather && (
           <p className="label-mono text-ink-2">

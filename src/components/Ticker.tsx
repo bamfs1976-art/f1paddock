@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { fetchPaddockIntel } from '../services/aiService';
-import { DRIVERS } from '../constants';
 import type { TickerItem } from '../types';
-
-const FALLBACK: TickerItem[] = DRIVERS.slice(0, 8).map((d) => ({
-  sym: d.code, val: `${d.pts} PTS`, pts: d.team,
-}));
+import { useDrivers } from '../services/seasonStore';
 
 export default function Ticker() {
-  const [items, setItems] = useState<TickerItem[]>(FALLBACK);
+  const { drivers } = useDrivers();
+  const [items, setItems] = useState<TickerItem[] | null>(null);
+  const fallback: TickerItem[] = drivers.slice(0, 8).map((d) => ({
+    sym: d.code, val: `${d.pts} PTS`, pts: d.team,
+  }));
 
   useEffect(() => {
     (async () => {
@@ -27,7 +27,8 @@ export default function Ticker() {
     })();
   }, []);
 
-  const repeated = [...items, ...items, ...items];
+  const list = items ?? fallback;
+  const repeated = [...list, ...list, ...list];
 
   return (
     <div className="border-y-2 border-ink bg-paper-2 overflow-hidden" aria-label="Live data ticker">

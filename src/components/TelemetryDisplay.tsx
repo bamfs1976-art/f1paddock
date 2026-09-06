@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { getLiveTelemetry } from '../services/f1Service';
-import { DRIVERS } from '../constants';
 import type { TelemetryData } from '../types';
+import { useDrivers } from '../services/seasonStore';
 
 export default function TelemetryDisplay() {
   const [telemetry, setTelemetry] = useState<TelemetryData | null>(null);
-  const [driverId, setDriverId] = useState<string>(DRIVERS[0].id);
-  const driver = DRIVERS.find((d) => d.id === driverId)!;
+  const { drivers: DRIVERS } = useDrivers();
+  const [driverId, setDriverId] = useState<string>('');
+  const driver = DRIVERS.find((d) => d.id === driverId) || DRIVERS[0];
+  const driverNumber = driver?.number;
 
   useEffect(() => {
     let cancelled = false;
     const tick = async () => {
-      const data = await getLiveTelemetry(driver.number);
+      const data = await getLiveTelemetry(driverNumber);
       if (!cancelled) setTelemetry(data);
     };
     tick();
@@ -35,7 +37,7 @@ export default function TelemetryDisplay() {
       if (interval) clearInterval(interval);
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, [driver.number]);
+  }, [driverNumber]);
 
   return (
     <section className="px-6 sm:px-10 py-6" aria-labelledby="telemetry-heading">
@@ -45,7 +47,7 @@ export default function TelemetryDisplay() {
           <h2 id="telemetry-heading" className="font-serif text-2xl mt-2">Telemetry Stream</h2>
         </div>
         <select
-          value={driverId}
+          value={driver?.id ?? ''}
           onChange={(e) => setDriverId(e.target.value)}
           className="bg-paper-2 border border-ink-3 px-3 py-2 font-mono text-xs"
           aria-label="Select driver"

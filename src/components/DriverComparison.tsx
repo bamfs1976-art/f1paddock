@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { X } from 'lucide-react';
 import { fetchDriverAnalysis } from '../services/aiService';
-import { DRIVERS } from '../constants';
 import type { DriverAnalysis } from '../types';
+import { useDrivers } from '../services/seasonStore';
 import SkeletonLoader from './ui/SkeletonLoader';
 
 interface Props {
@@ -38,6 +38,7 @@ export default function DriverComparison({ codeA, codeB, onClose }: Props) {
   const [analysis, setAnalysis] = useState<DriverAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { drivers: DRIVERS } = useDrivers();
 
   const driverA = DRIVERS.find((d) => d.code === codeA);
   const driverB = DRIVERS.find((d) => d.code === codeB);

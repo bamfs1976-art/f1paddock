@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Star, GitCompare } from 'lucide-react';
-import { DRIVERS } from '../constants';
 import type { Driver, LiveSyncState } from '../types';
 import PositionChangeIndicator from './ui/PositionChangeIndicator';
+import SkeletonLoader from './ui/SkeletonLoader';
 import DriverProfile from './DriverProfile';
 import DriverComparison from './DriverComparison';
 import { getPreferences, savePreferences } from '../services/supabaseService';
+import { useDrivers } from '../services/seasonStore';
 
 interface Props {
   liveSync?: LiveSyncState | null;
@@ -17,6 +18,7 @@ export default function DriversStandings({ liveSync }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
   const [profile, setProfile] = useState<Driver | null>(null);
   const [showCompare, setShowCompare] = useState(false);
+  const { drivers, round, status } = useDrivers();
 
   useEffect(() => {
     (async () => {
@@ -45,7 +47,7 @@ export default function DriversStandings({ liveSync }: Props) {
     }
   };
 
-  const drivers = DRIVERS;
+  const loading = status === 'loading';
 
   return (
     <section className="px-6 sm:px-10 py-10" aria-labelledby="drivers-heading">
@@ -60,6 +62,9 @@ export default function DriversStandings({ liveSync }: Props) {
               </span>
             )}
           </h2>
+          {!loading && round > 0 && (
+            <p className="label-mono mt-2">AFTER ROUND {round} · ARROWS VERSUS ROUND {Math.max(1, round - 1)}</p>
+          )}
         </div>
         {selected.length === 2 && (
           <button
@@ -73,7 +78,7 @@ export default function DriversStandings({ liveSync }: Props) {
         )}
       </div>
 
-      <div className="border-2 border-ink bg-paper-2" role="table" aria-live="polite">
+      <div className="border-2 border-ink bg-paper-2" role="table" aria-live="polite" aria-busy={loading}>
         <div className="grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2 border-b border-ink-3 label-mono">
           <div>POS</div>
           <div aria-label="Position change">Δ</div>
@@ -84,56 +89,60 @@ export default function DriversStandings({ liveSync }: Props) {
           <div className="hidden sm:block">TEAM</div>
           <div className="text-right">PTS</div>
         </div>
-        <AnimatePresence initial={false}>
-          {drivers.map((d, idx) => {
-            const isFav = favs.includes(d.id);
-            const isSel = selected.includes(d.code);
-            return (
-              <motion.div
-                key={d.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.03, duration: 0.3 }}
-                className={`hover-bar grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-ink-3/40 ${isFav ? 'bg-paper-3/40' : ''}`}
-              >
-                <div className="font-mono font-bold tabular-nums">{d.pos}</div>
-                <div><PositionChangeIndicator change={d.posChange ?? 0} /></div>
-                <div>
-                  <input
-                    type="checkbox"
-                    checked={isSel}
-                    onChange={() => toggleSelect(d.code)}
-                    disabled={!isSel && selected.length >= 2}
-                    aria-label={`Select ${d.name} for comparison`}
-                    className="cursor-pointer"
-                  />
-                </div>
-                <div className="h-7 w-1" style={{ background: d.color }} aria-hidden="true" />
-                <div className="font-mono font-bold">{d.code}</div>
-                <button
-                  onClick={() => setProfile(d)}
-                  className="text-left truncate hover:text-racing transition-colors"
-                  aria-label={`View profile for ${d.name}`}
+        {loading ? (
+          <div className="p-3"><SkeletonLoader type="row" count={10} /></div>
+        ) : (
+          <AnimatePresence initial={false}>
+            {drivers.map((d, idx) => {
+              const isFav = favs.includes(d.id);
+              const isSel = selected.includes(d.code);
+              return (
+                <motion.div
+                  key={d.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.03, duration: 0.3 }}
+                  className={`hover-bar grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2.5 items-center text-sm border-b border-ink-3/40 ${isFav ? 'bg-paper-3/40' : ''}`}
                 >
-                  {d.name}
-                  <span className="sm:hidden block text-[10px] text-ink-3">{d.team}</span>
-                </button>
-                <div className="hidden sm:block text-ink-2 text-xs truncate">{d.team}</div>
-                <div className="text-right flex items-center justify-end gap-2">
+                  <div className="font-mono font-bold tabular-nums">{d.pos}</div>
+                  <div><PositionChangeIndicator change={d.posChange ?? 0} /></div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      checked={isSel}
+                      onChange={() => toggleSelect(d.code)}
+                      disabled={!isSel && selected.length >= 2}
+                      aria-label={`Select ${d.name} for comparison`}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                  <div className="h-7 w-1" style={{ background: d.color }} aria-hidden="true" />
+                  <div className="font-mono font-bold">{d.code}</div>
                   <button
-                    onClick={() => toggleFav(d.id)}
-                    aria-label={isFav ? `Remove ${d.name} from favourites` : `Add ${d.name} to favourites`}
-                    className="opacity-60 hover:opacity-100"
+                    onClick={() => setProfile(d)}
+                    className="text-left truncate hover:text-racing transition-colors"
+                    aria-label={`View profile for ${d.name}`}
                   >
-                    <Star size={12} fill={isFav ? '#FFC72C' : 'none'} stroke={isFav ? '#FFC72C' : 'currentColor'} />
+                    {d.name}
+                    <span className="sm:hidden block text-[10px] text-ink-3">{d.team}</span>
                   </button>
-                  <span className="font-mono font-bold tabular-nums">{d.pts}</span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                  <div className="hidden sm:block text-ink-2 text-xs truncate">{d.team}</div>
+                  <div className="text-right flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => toggleFav(d.id)}
+                      aria-label={isFav ? `Remove ${d.name} from favourites` : `Add ${d.name} to favourites`}
+                      className="opacity-60 hover:opacity-100"
+                    >
+                      <Star size={12} fill={isFav ? '#FFC72C' : 'none'} stroke={isFav ? '#FFC72C' : 'currentColor'} />
+                    </button>
+                    <span className="font-mono font-bold tabular-nums">{d.pts}</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
       </div>
 
       {profile && <DriverProfile driver={profile} onClose={() => setProfile(null)} />}

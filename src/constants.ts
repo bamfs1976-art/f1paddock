@@ -163,74 +163,40 @@ export const TEAMS: Team[] = [
   { id: 'aston-martin', pos: 11, name: 'Aston Martin', engine: 'Honda',    country: '🇬🇧', pts: 0,   color: TEAM_COLORS['Aston Martin'], posChange: -5 },
 ];
 
+// Static circuit metadata only. Dates here are the published calendar and are
+// used as a fallback when neither Jolpica nor OpenF1 is reachable. Results,
+// winners, podiums and session times are never stored here: they come from
+// standingsService and scheduleService at runtime.
 export const CALENDAR: Race[] = [
-  {
-    round: 1, country: 'Australia', flag: '🇦🇺', circuit: 'Albert Park Circuit', circuitId: 'melbourne',
-    date: '2026-03-08', location: 'Melbourne', laps: 58, distance: '306.124 km',
-    isDone: true, winner: 'George Russell', weather: 'Dry · 21°C',
-    podiumDetailed: [
-      { driver: 'RUS', team: 'Mercedes', gap: '+0.000' },
-      { driver: 'ANT', team: 'Mercedes', gap: '+2.974' },
-      { driver: 'LEC', team: 'Ferrari',  gap: '+15.519' },
-    ],
-    fastestLap: { driver: 'RUS', time: '1:18.991' },
-    tyreCompounds: ['soft', 'medium', 'hard'],
-  },
-  {
-    round: 2, country: 'China', flag: '🇨🇳', circuit: 'Shanghai International Circuit', circuitId: 'shanghai',
-    date: '2026-03-15', location: 'Shanghai', laps: 56, distance: '305.066 km',
-    isDone: true, winner: 'Andrea Kimi Antonelli', weather: 'Dry · 24°C',
-    podiumDetailed: [
-      { driver: 'ANT', team: 'Mercedes', gap: '+0.000' },
-      { driver: 'RUS', team: 'Mercedes', gap: '+5.515' },
-      { driver: 'HAM', team: 'Ferrari',  gap: '+25.267' },
-    ],
-    fastestLap: { driver: 'ANT', time: '1:32.008' },
-    tyreCompounds: ['soft', 'medium'],
-  },
-  {
-    round: 3, country: 'Japan', flag: '🇯🇵', circuit: 'Suzuka International Racing Course', circuitId: 'suzuka',
-    date: '2026-03-29', location: 'Suzuka', laps: 53, distance: '307.471 km',
-    isDone: true, winner: 'Andrea Kimi Antonelli', weather: 'Dry · 18°C',
-    podiumDetailed: [
-      { driver: 'ANT', team: 'Mercedes', gap: '+0.000' },
-      { driver: 'PIA', team: 'McLaren',  gap: '+13.722' },
-      { driver: 'LEC', team: 'Ferrari',  gap: '+15.270' },
-    ],
-    fastestLap: { driver: 'ANT', time: '1:30.412' },
-    tyreCompounds: ['medium', 'hard'],
-  },
-  {
-    round: 4, country: 'United States', flag: '🇺🇸', circuit: 'Miami International Autodrome', circuitId: 'miami',
-    date: '2026-05-03', location: 'Miami', laps: 57, distance: '308.326 km',
-    isNext: true,
-    sessions: [
-      { type: 'FP1',                date: '2026-05-01', time: '12:00 ET / 17:00 BST', status: 'completed' },
-      { type: 'Sprint Qualifying',  date: '2026-05-01', time: '16:30 ET / 21:30 BST', status: 'completed' },
-      { type: 'Sprint',             date: '2026-05-02', time: '12:00 ET / 17:00 BST', status: 'completed' },
-      { type: 'Qualifying',         date: '2026-05-02', time: '16:00 ET / 21:00 BST', status: 'completed' },
-      { type: 'Race',               date: '2026-05-03', time: '13:00 ET / 18:00 BST', status: 'live' },
-    ],
-  },
-  { round: 5,  country: 'Canada',         flag: '🇨🇦', circuit: 'Circuit Gilles Villeneuve',     circuitId: 'montreal',    date: '2026-05-24', location: 'Montréal' },
-  { round: 6,  country: 'Monaco',         flag: '🇲🇨', circuit: 'Circuit de Monaco',             circuitId: 'monaco',      date: '2026-06-07', location: 'Monte Carlo' },
-  { round: 7,  country: 'Catalunya',      flag: '🇪🇸', circuit: 'Circuit de Barcelona-Catalunya',circuitId: 'barcelona',   date: '2026-06-14', location: 'Barcelona' },
-  { round: 8,  country: 'Austria',        flag: '🇦🇹', circuit: 'Red Bull Ring',                 circuitId: 'spielberg',   date: '2026-06-28', location: 'Spielberg' },
-  { round: 9,  country: 'United Kingdom', flag: '🇬🇧', circuit: 'Silverstone Circuit',           circuitId: 'silverstone', date: '2026-07-05', location: 'Silverstone' },
-  { round: 10, country: 'Belgium',        flag: '🇧🇪', circuit: 'Circuit de Spa-Francorchamps',  circuitId: 'spa',         date: '2026-07-19', location: 'Spa' },
-  { round: 11, country: 'Hungary',        flag: '🇭🇺', circuit: 'Hungaroring',                   circuitId: 'hungary',     date: '2026-07-26', location: 'Budapest' },
-  { round: 12, country: 'Netherlands',    flag: '🇳🇱', circuit: 'Circuit Zandvoort',             circuitId: 'zandvoort',   date: '2026-08-23', location: 'Zandvoort' },
-  { round: 13, country: 'Italy',          flag: '🇮🇹', circuit: 'Autodromo Nazionale Monza',     circuitId: 'monza',       date: '2026-09-06', location: 'Monza' },
-  { round: 14, country: 'Spain',          flag: '🇪🇸', circuit: 'Madring (Circuito IFEMA Madrid)', circuitId: 'madrid',    date: '2026-09-13', location: 'Madrid' },
-  { round: 15, country: 'Azerbaijan',     flag: '🇦🇿', circuit: 'Baku City Circuit',             circuitId: 'baku',        date: '2026-09-26', location: 'Baku' },
-  { round: 16, country: 'Singapore',      flag: '🇸🇬', circuit: 'Marina Bay Street Circuit',     circuitId: 'singapore',   date: '2026-10-11', location: 'Singapore' },
-  { round: 17, country: 'United States',  flag: '🇺🇸', circuit: 'Circuit of the Americas',       circuitId: 'cota',        date: '2026-10-25', location: 'Austin' },
-  { round: 18, country: 'Mexico',         flag: '🇲🇽', circuit: 'Autódromo Hermanos Rodríguez',  circuitId: 'mexico',      date: '2026-11-01', location: 'Mexico City' },
-  { round: 19, country: 'Brazil',         flag: '🇧🇷', circuit: 'Interlagos',                    circuitId: 'interlagos',  date: '2026-11-08', location: 'São Paulo' },
-  { round: 20, country: 'United States',  flag: '🇺🇸', circuit: 'Las Vegas Strip Circuit',       circuitId: 'lasvegas',    date: '2026-11-21', location: 'Las Vegas' },
-  { round: 21, country: 'Qatar',          flag: '🇶🇦', circuit: 'Lusail International Circuit',  circuitId: 'lusail',      date: '2026-11-29', location: 'Lusail' },
-  { round: 22, country: 'Abu Dhabi',      flag: '🇦🇪', circuit: 'Yas Marina Circuit',            circuitId: 'yasmarina',   date: '2026-12-06', location: 'Abu Dhabi' },
+  { round: 1,  country: 'Australia',      flag: '🇦🇺', circuit: 'Albert Park Circuit',            circuitId: 'melbourne',   ergastId: 'albert_park',   date: '2026-03-08', location: 'Melbourne',    laps: 58, distance: '306.124 km' },
+  { round: 2,  country: 'China',          flag: '🇨🇳', circuit: 'Shanghai International Circuit', circuitId: 'shanghai',    ergastId: 'shanghai',      date: '2026-03-15', location: 'Shanghai',     laps: 56, distance: '305.066 km' },
+  { round: 3,  country: 'Japan',          flag: '🇯🇵', circuit: 'Suzuka International Racing Course', circuitId: 'suzuka',  ergastId: 'suzuka',        date: '2026-03-29', location: 'Suzuka',       laps: 53, distance: '307.471 km' },
+  { round: 4,  country: 'United States',  flag: '🇺🇸', circuit: 'Miami International Autodrome',  circuitId: 'miami',       ergastId: 'miami',         date: '2026-05-03', location: 'Miami',        laps: 57, distance: '308.326 km' },
+  { round: 5,  country: 'Canada',         flag: '🇨🇦', circuit: 'Circuit Gilles Villeneuve',      circuitId: 'montreal',    ergastId: 'villeneuve',    date: '2026-05-24', location: 'Montréal',     laps: 70, distance: '305.270 km' },
+  { round: 6,  country: 'Monaco',         flag: '🇲🇨', circuit: 'Circuit de Monaco',              circuitId: 'monaco',      ergastId: 'monaco',        date: '2026-06-07', location: 'Monte Carlo',  laps: 78, distance: '260.286 km' },
+  { round: 7,  country: 'Catalunya',      flag: '🇪🇸', circuit: 'Circuit de Barcelona-Catalunya', circuitId: 'barcelona',   ergastId: 'catalunya',     date: '2026-06-14', location: 'Barcelona',    laps: 66, distance: '307.236 km' },
+  { round: 8,  country: 'Austria',        flag: '🇦🇹', circuit: 'Red Bull Ring',                  circuitId: 'spielberg',   ergastId: 'red_bull_ring', date: '2026-06-28', location: 'Spielberg',    laps: 71, distance: '306.452 km' },
+  { round: 9,  country: 'United Kingdom', flag: '🇬🇧', circuit: 'Silverstone Circuit',            circuitId: 'silverstone', ergastId: 'silverstone',   date: '2026-07-05', location: 'Silverstone',  laps: 52, distance: '306.198 km' },
+  { round: 10, country: 'Belgium',        flag: '🇧🇪', circuit: 'Circuit de Spa-Francorchamps',   circuitId: 'spa',         ergastId: 'spa',           date: '2026-07-19', location: 'Spa',          laps: 44, distance: '308.052 km' },
+  { round: 11, country: 'Hungary',        flag: '🇭🇺', circuit: 'Hungaroring',                    circuitId: 'hungary',     ergastId: 'hungaroring',   date: '2026-07-26', location: 'Budapest',     laps: 70, distance: '306.630 km' },
+  { round: 12, country: 'Netherlands',    flag: '🇳🇱', circuit: 'Circuit Zandvoort',              circuitId: 'zandvoort',   ergastId: 'zandvoort',     date: '2026-08-23', location: 'Zandvoort',    laps: 72, distance: '306.587 km' },
+  { round: 13, country: 'Italy',          flag: '🇮🇹', circuit: 'Autodromo Nazionale Monza',      circuitId: 'monza',       ergastId: 'monza',         date: '2026-09-06', location: 'Monza',        laps: 53, distance: '306.720 km' },
+  { round: 14, country: 'Spain',          flag: '🇪🇸', circuit: 'Madring (Circuito IFEMA Madrid)', circuitId: 'madrid',     ergastId: 'madring',       date: '2026-09-13', location: 'Madrid' },
+  { round: 15, country: 'Azerbaijan',     flag: '🇦🇿', circuit: 'Baku City Circuit',              circuitId: 'baku',        ergastId: 'baku',          date: '2026-09-26', location: 'Baku',         laps: 51, distance: '306.049 km' },
+  { round: 16, country: 'Singapore',      flag: '🇸🇬', circuit: 'Marina Bay Street Circuit',      circuitId: 'singapore',   ergastId: 'marina_bay',    date: '2026-10-11', location: 'Singapore',    laps: 62, distance: '306.143 km' },
+  { round: 17, country: 'United States',  flag: '🇺🇸', circuit: 'Circuit of the Americas',        circuitId: 'cota',        ergastId: 'americas',      date: '2026-10-25', location: 'Austin',       laps: 56, distance: '308.405 km' },
+  { round: 18, country: 'Mexico',         flag: '🇲🇽', circuit: 'Autódromo Hermanos Rodríguez',   circuitId: 'mexico',      ergastId: 'rodriguez',     date: '2026-11-01', location: 'Mexico City',  laps: 71, distance: '305.354 km' },
+  { round: 19, country: 'Brazil',         flag: '🇧🇷', circuit: 'Interlagos',                     circuitId: 'interlagos',  ergastId: 'interlagos',    date: '2026-11-08', location: 'São Paulo',    laps: 71, distance: '305.879 km' },
+  { round: 20, country: 'United States',  flag: '🇺🇸', circuit: 'Las Vegas Strip Circuit',        circuitId: 'lasvegas',    ergastId: 'vegas',         date: '2026-11-21', location: 'Las Vegas',    laps: 50, distance: '309.958 km' },
+  { round: 21, country: 'Qatar',          flag: '🇶🇦', circuit: 'Lusail International Circuit',   circuitId: 'lusail',      ergastId: 'losail',        date: '2026-11-29', location: 'Lusail',       laps: 57, distance: '306.660 km' },
+  { round: 22, country: 'Abu Dhabi',      flag: '🇦🇪', circuit: 'Yas Marina Circuit',             circuitId: 'yasmarina',   ergastId: 'yas_marina',    date: '2026-12-06', location: 'Abu Dhabi',    laps: 58, distance: '306.183 km' },
 ];
+
+// The hardcoded standings above are a snapshot taken after the Miami sprint.
+// They render only when the Jolpica proxy fails and no cache exists, and the
+// UI labels them with this date.
+export const SNAPSHOT_DATE = '2026-05-03';
+export const SNAPSHOT_LABEL = 'Snapshot from 3 May 2026';
 
 export const NEWS: NewsItem[] = [
   { id: 1, kicker: 'CHAMPIONSHIP', headline: 'Antonelli leads after Suzuka — youngest leader in F1 history', body: 'Andrea Kimi Antonelli, 19, has become the youngest driver ever to lead the Formula 1 World Championship. Two consecutive wins in China and Japan, both from pole, and a 7-point cushion over team-mate George Russell. Mercedes have built the dominant car of the new regulation era and the rookie generation is delivering on every promise.', type: 'lead' },

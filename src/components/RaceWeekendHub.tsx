@@ -1,26 +1,41 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { CALENDAR } from '../constants';
-import type { LiveSyncState } from '../types';
+import type { LiveSyncState, ScheduleSession } from '../types';
 import WeatherBar from './WeatherBar';
 import RaceControlFeed from './RaceControlFeed';
 import CircuitMap from './ui/CircuitMap';
 import SessionCountdown from './SessionCountdown';
+import SkeletonLoader from './ui/SkeletonLoader';
+import { useSchedule } from '../services/seasonStore';
+import { findNextRound } from '../services/scheduleService';
+import { fmtDayTime } from '../utils/time';
+import { useNow } from '../hooks/useNow';
 
 interface Props {
   liveSync: LiveSyncState | null;
 }
 
-const STATUS_BADGE: Record<string, string> = {
+type SessionStatus = 'upcoming' | 'live' | 'completed';
+
+const STATUS_BADGE: Record<SessionStatus, string> = {
   upcoming: 'border border-ink-3 text-ink-2',
   live: 'bg-racing text-white',
   completed: 'bg-paper-3 text-ink-2',
 };
 
+function sessionStatus(s: ScheduleSession, now: number): SessionStatus {
+  const start = new Date(s.dateStart).getTime();
+  const end = new Date(s.dateEnd).getTime();
+  if (now < start) return 'upcoming';
+  if (now <= end) return 'live';
+  return 'completed';
+}
+
 export default function RaceWeekendHub({ liveSync }: Props) {
   const [showRC, setShowRC] = useState(false);
-  const next = CALENDAR.find((r) => r.isNext) || CALENDAR.find((r) => !r.isDone);
-  if (!next) return null;
+  const now = useNow(30_000);
+  const schedule = useSchedule();
+  const next = schedule.data ? findNextRound(schedule.data, now) : null;
 
   return (
     <section className="px-6 sm:px-10 py-10" aria-labelledby="weekend-heading">
@@ -28,34 +43,45 @@ export default function RaceWeekendHub({ liveSync }: Props) {
       <h2 id="weekend-heading" className="font-serif text-3xl mt-3 mb-6">Race Weekend Hub</h2>
 
       <div className="border-2 border-ink bg-paper-2">
-        <div className="p-4 sm:p-6 border-b border-ink-3 flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl" aria-hidden="true">{next.flag}</span>
-              <span className="label-mono">ROUND {next.round} · {next.country.toUpperCase()}</span>
-            </div>
-            <h3 className="font-serif text-2xl">{next.country} Grand Prix</h3>
-            <p className="text-ink-2 text-sm">{next.circuit} · {next.location}</p>
+        {!next ? (
+          <div className="p-4 sm:p-6" aria-busy={schedule.status === 'loading'}>
+            {schedule.status === 'loading'
+              ? <SkeletonLoader type="card" height="120px" />
+              : <p className="label-mono text-ink-3">{schedule.status === 'unavailable' ? 'SCHEDULE UNAVAILABLE' : 'SEASON COMPLETE'}</p>}
           </div>
-          <CircuitMap circuitId={next.circuitId} width={200} height={120} label={next.country} />
-        </div>
+        ) : (
+          <div className="p-4 sm:p-6 border-b border-ink-3 flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl" aria-hidden="true">{next.flag}</span>
+                <span className="label-mono">ROUND {next.round} · {next.country.toUpperCase()}{next.isSprint ? ' · SPRINT WEEKEND' : ''}</span>
+              </div>
+              <h3 className="font-serif text-2xl">{next.name}</h3>
+              <p className="text-ink-2 text-sm">{next.circuit}{next.location ? ` · ${next.location}` : ''}</p>
+            </div>
+            <CircuitMap circuitId={next.circuitId} width={200} height={120} label={next.country} />
+          </div>
+        )}
 
         <div className="p-4 sm:p-6 grid sm:grid-cols-2 gap-4 border-b border-ink-3">
           <SessionCountdown />
           <WeatherBar weather={liveSync?.weather ?? null} />
         </div>
 
-        {next.sessions && (
+        {next && next.sessions.length > 0 && (
           <div className="p-4 sm:p-6 border-b border-ink-3">
-            <div className="label-mono mb-3">SESSION SCHEDULE</div>
+            <div className="label-mono mb-3">SESSION SCHEDULE · TIMES IN YOUR ZONE</div>
             <ul className="grid sm:grid-cols-2 gap-2">
-              {next.sessions.map((s) => (
-                <li key={s.type + s.date} className="flex items-center justify-between text-sm border border-ink-3 px-3 py-2">
-                  <span className="font-mono">{s.type}</span>
-                  <span className="text-ink-2 text-xs">{s.date} · {s.time}</span>
-                  <span className={`font-mono text-[10px] uppercase px-2 py-0.5 ${STATUS_BADGE[s.status]}`}>{s.status}</span>
-                </li>
-              ))}
+              {next.sessions.map((s) => {
+                const status = sessionStatus(s, now);
+                return (
+                  <li key={s.name + s.dateStart} className="flex items-center justify-between gap-2 text-sm border border-ink-3 px-3 py-2">
+                    <span className="font-mono">{s.name}</span>
+                    <span className="text-ink-2 text-xs">{fmtDayTime(s.dateStart)}</span>
+                    <span className={`font-mono text-[10px] uppercase px-2 py-0.5 ${STATUS_BADGE[status]}`}>{status}</span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

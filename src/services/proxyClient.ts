@@ -32,6 +32,15 @@ export async function proxyFetch<T>(url: string, key: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+/** Record freshness from headers the caller has already read (used by f1Service). */
+export function recordFreshness(key: string, cacheHeader: string | null, tsHeader: string | null): void {
+  const fetchedAt = tsHeader ? Date.parse(tsHeader) : Date.now();
+  freshness.set(key, {
+    status: (cacheHeader || 'MISS').startsWith('STALE') ? 'stale' : 'fresh',
+    fetchedAt: Number.isFinite(fetchedAt) ? fetchedAt : Date.now(),
+  });
+}
+
 /** Freshness of the most recent response for a logical key (see standingsService). */
 export function getFreshness(key: string): Freshness | null {
   return freshness.get(key) ?? null;

@@ -14,6 +14,7 @@ export interface Driver {
   image?: string;
   posChange?: number;
   number?: number;
+  wins?: number;
 }
 
 export interface Team {
@@ -26,35 +27,48 @@ export interface Team {
   color: string;
   isFav?: boolean;
   posChange?: number;
+  wins?: number;
 }
 
+// Static circuit metadata, one entry per round, edited by hand in constants.ts.
 export interface Race {
-  round: number | string;
+  round: number;
   country: string;
   flag: string;
   circuit: string;
-  date: string;
-  circuitId?: string;
-  winner?: string;
-  podium?: string[];
-  podiumDetailed?: { driver: string; team: string; gap: string }[];
-  fastestLap?: { driver: string; time: string };
-  weather?: string;
+  circuitId?: string;   // key into CircuitMap paths
+  ergastId?: string;    // Jolpica circuitId, used to match schedule rows
+  date: string;         // fallback race date, yyyy-mm-dd
   location?: string;
   laps?: number;
   distance?: string;
-  tyreCompounds?: string[];
-  isDone?: boolean;
-  isNext?: boolean;
-  isCancelled?: boolean;
-  sessions?: RaceSession[];
 }
 
-export interface RaceSession {
-  type: 'FP1' | 'FP2' | 'FP3' | 'Qualifying' | 'Sprint Qualifying' | 'Sprint' | 'Race';
-  date: string;
-  time: string;
-  status: 'upcoming' | 'live' | 'completed';
+// A session in the merged schedule (see scheduleService).
+export interface ScheduleSession {
+  name: string;          // real session name: Practice 1, Sprint Qualifying, Qualifying, Race
+  dateStart: string;     // ISO datetime
+  dateEnd: string;       // ISO datetime; estimated when the source has no end time
+  sessionKey?: number;   // OpenF1 session key when known
+  source: 'openf1' | 'jolpica' | 'static';
+}
+
+// One round of the season merged from static metadata, Jolpica and OpenF1.
+export interface ScheduleRound extends Race {
+  name: string;          // "Italian Grand Prix"
+  meetingKey?: number;
+  raceStart?: string;    // ISO datetime of the race start when known
+  isSprint: boolean;
+  sessions: ScheduleSession[];
+}
+
+export interface Stint {
+  driver_number: number;
+  stint_number: number;
+  lap_start: number;
+  lap_end: number;
+  compound: string;
+  tyre_age_at_start?: number;
 }
 
 export interface NewsItem {
