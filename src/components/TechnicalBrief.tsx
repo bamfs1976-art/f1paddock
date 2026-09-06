@@ -84,8 +84,8 @@ export default function TechnicalBrief() {
   };
 
   return (
-    <section className="px-6 sm:px-10 py-10" aria-labelledby="tech-heading">
-      <span className="section-label">S 05 // TECHNICAL BRIEF</span>
+    <section id="technical" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="tech-heading">
+      <span className="section-label">S 08 // TECHNICAL BRIEF</span>
       <h2 id="tech-heading" className="font-serif text-3xl mt-3 mb-2">2026 Regulations</h2>
       <p className="font-serif text-4xl sm:text-5xl mb-6">The Sustainable Speed Revolution</p>
 

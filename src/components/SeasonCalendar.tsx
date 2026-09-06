@@ -168,8 +168,8 @@ export default function SeasonCalendar() {
   const next = rounds ? findNextRound(rounds, now) : null;
 
   return (
-    <section className="px-6 sm:px-10 py-10" aria-labelledby="calendar-heading">
-      <span className="section-label">S 03 // 2026 SEASON</span>
+    <section id="calendar" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="calendar-heading">
+      <span className="section-label">S 01 // 2026 SEASON</span>
       <h2 id="calendar-heading" className="font-serif text-3xl mt-3 mb-6">Season Calendar</h2>
       {!rounds ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true">

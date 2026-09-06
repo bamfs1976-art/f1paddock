@@ -1,20 +1,12 @@
-import { Calendar, Trophy, Activity, Newspaper, MessageSquare } from 'lucide-react';
+import { TABS, type Tab } from '../navigation';
 
-export type Tab = 'calendar' | 'standings' | 'live' | 'intel' | 'chat';
+export type { Tab };
 
 interface Props {
   active: Tab;
   onChange: (t: Tab) => void;
   liveActive?: boolean;
 }
-
-const TABS: { id: Tab; label: string; Icon: typeof Calendar }[] = [
-  { id: 'calendar',  label: 'Calendar',  Icon: Calendar },
-  { id: 'standings', label: 'Standings', Icon: Trophy },
-  { id: 'live',      label: 'Live',      Icon: Activity },
-  { id: 'intel',     label: 'Intel',     Icon: Newspaper },
-  { id: 'chat',      label: 'Chat',      Icon: MessageSquare },
-];
 
 export default function MobileNav({ active, onChange, liveActive }: Props) {
   return (
@@ -23,11 +15,12 @@ export default function MobileNav({ active, onChange, liveActive }: Props) {
       aria-label="Primary navigation"
     >
       {TABS.map(({ id, label, Icon }) => {
-        const isActive = active === id;
+        const tab = id as Tab;
+        const isActive = active === tab;
         return (
           <button
             key={id}
-            onClick={() => onChange(id)}
+            onClick={() => onChange(tab)}
             className={`relative py-2 flex flex-col items-center gap-1 ${isActive ? 'text-ink' : 'text-ink-2'}`}
             aria-current={isActive ? 'page' : undefined}
             aria-label={label}

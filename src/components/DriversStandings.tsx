@@ -50,10 +50,10 @@ export default function DriversStandings({ liveSync }: Props) {
   const loading = status === 'loading';
 
   return (
-    <section className="px-6 sm:px-10 py-10" aria-labelledby="drivers-heading">
+    <section id="drivers" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="drivers-heading">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <span className="section-label">S 01 // DRIVERS' CHAMPIONSHIP</span>
+          <span className="section-label">S 02 // DRIVERS' CHAMPIONSHIP</span>
           <h2 id="drivers-heading" className="font-serif text-3xl mt-3">
             Drivers' Standings
             {liveSync && (

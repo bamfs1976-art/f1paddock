@@ -43,10 +43,10 @@ export default function PaddockIntel() {
   const racePreview = data?.racePreview;
 
   return (
-    <section className="px-6 sm:px-10 py-10" aria-labelledby="intel-heading">
+    <section id="intel" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="intel-heading">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <span className="section-label">S 04 // PADDOCK INTEL</span>
+          <span className="section-label">S 07 // PADDOCK INTEL</span>
           <h2 id="intel-heading" className="font-serif text-3xl mt-3">Paddock Intelligence</h2>
         </div>
         <button

@@ -31,8 +31,8 @@ export default function ConstructorsStandings() {
   };
 
   return (
-    <section className="px-6 sm:px-10 py-10" aria-labelledby="teams-heading">
-      <span className="section-label">S 02 // CONSTRUCTORS' CHAMPIONSHIP</span>
+    <section id="constructors" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="teams-heading">
+      <span className="section-label">S 03 // CONSTRUCTORS' CHAMPIONSHIP</span>
       <h2 id="teams-heading" className="font-serif text-3xl mt-3 mb-6">Constructors' Standings</h2>
 
       <div className="border-2 border-ink bg-paper-2" role="table" aria-busy={loading}>

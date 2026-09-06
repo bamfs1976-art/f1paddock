@@ -40,10 +40,10 @@ export default function TelemetryDisplay() {
   }, [driverNumber]);
 
   return (
-    <section className="px-6 sm:px-10 py-6" aria-labelledby="telemetry-heading">
+    <section id="telemetry" className="px-6 sm:px-10 py-6 scroll-mt-14" aria-labelledby="telemetry-heading">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div>
-          <span className="section-label">S 06 // LIVE TELEMETRY</span>
+          <span className="section-label">S 05 // LIVE TELEMETRY</span>
           <h2 id="telemetry-heading" className="font-serif text-2xl mt-2">Telemetry Stream</h2>
         </div>
         <select

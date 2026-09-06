@@ -38,8 +38,8 @@ export default function RaceWeekendHub({ liveSync }: Props) {
   const next = schedule.data ? findNextRound(schedule.data, now) : null;
 
   return (
-    <section className="px-6 sm:px-10 py-10" aria-labelledby="weekend-heading">
-      <span className="section-label">S 07 // RACE WEEKEND</span>
+    <section id="weekend" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="weekend-heading">
+      <span className="section-label">S 04 // RACE WEEKEND</span>
       <h2 id="weekend-heading" className="font-serif text-3xl mt-3 mb-6">Race Weekend Hub</h2>
 
       <div className="border-2 border-ink bg-paper-2">
