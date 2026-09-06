@@ -45,9 +45,9 @@ export default function ConstructorsStandings() {
         className="mb-3"
       />
 
-      <div className="border-2 border-ink bg-paper-2" role="table" aria-busy={loading}>
+      <div className="border-2 border-ink bg-paper-2" role="group" aria-label="Constructors' standings" aria-busy={loading}>
         <div className="grid grid-cols-[40px_30px_4px_1fr_70px_60px_70px] sm:grid-cols-[50px_40px_4px_1fr_120px_80px_80px] gap-2 px-3 py-2 border-b border-rule label-mono">
-          <div>POS</div><div aria-label="Position change">Δ</div><div></div>
+          <div>POS</div><div><span aria-hidden="true">Δ</span><span className="sr-only">Position change</span></div><div></div>
           <div>TEAM</div><div className="hidden sm:block">ENGINE</div>
           <div className="text-center">FAV</div>
           <div className="text-right">PTS</div>

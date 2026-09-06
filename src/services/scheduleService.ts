@@ -215,11 +215,12 @@ export function findUpcomingSession(rounds: ScheduleRound[], now = Date.now()): 
   return best;
 }
 
-/** The most recent session which has already ended. */
-export function findLastFinishedSession(rounds: ScheduleRound[], now = Date.now()): { round: ScheduleRound; session: ScheduleSession } | null {
+/** The most recent session which has already ended; with `withKey`, only sessions OpenF1 has published. */
+export function findLastFinishedSession(rounds: ScheduleRound[], now = Date.now(), withKey = false): { round: ScheduleRound; session: ScheduleSession } | null {
   let best: { round: ScheduleRound; session: ScheduleSession } | null = null;
   for (const r of rounds) {
     for (const s of r.sessions) {
+      if (withKey && !s.sessionKey) continue;
       const end = new Date(s.dateEnd).getTime();
       if (end < now && (!best || end > new Date(best.session.dateEnd).getTime())) {
         best = { round: r, session: s };

@@ -55,12 +55,13 @@ export default function Ticker() {
   const repeated = [...list, ...list];
 
   return (
-    <div
-      className="border-y-2 border-ink bg-paper-2 overflow-hidden"
-      role="marquee"
-      aria-label="Season ticker. Pauses while focused."
-      tabIndex={0}
-    >
+    <section aria-label="Season ticker" className="border-y-2 border-ink bg-paper-2 overflow-hidden">
+      <div
+        role="marquee"
+        aria-label="Season ticker. Pauses while focused."
+        tabIndex={0}
+        className="overflow-hidden"
+      >
       <div key={`${pass}-${list.length}`} className="flex ticker-once whitespace-nowrap py-2">
         {repeated.map((item, i) => (
           <span key={i} className="font-mono text-xs px-4 flex items-center gap-2" aria-hidden={i >= list.length ? true : undefined}>
@@ -73,6 +74,7 @@ export default function Ticker() {
           </span>
         ))}
       </div>
-    </div>
+      </div>
+    </section>
   );
 }

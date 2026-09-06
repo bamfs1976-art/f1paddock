@@ -17,6 +17,8 @@ export default function SpeedTraceChart({ driverIds }: Props) {
   const { drivers: DRIVERS, status } = useDrivers();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unavailable, setUnavailable] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const ids = useMemo(
     () => driverIds ?? DRIVERS.slice(0, 2).map((d) => d.id),
     // Only re-derive when the top two actually change, not on every render.
@@ -31,10 +33,13 @@ export default function SpeedTraceChart({ driverIds }: Props) {
       setLoading(true);
       const drivers = ids.map((id) => DRIVERS.find((d) => d.id === id)!).filter(Boolean);
       const lapsByDriver: Record<string, LapData[]> = {};
+      let failed = false;
       await Promise.all(
         drivers.map(async (d) => {
           if (d.number) {
-            lapsByDriver[d.code] = await getLapData(d.number);
+            const laps = await getLapData(d.number);
+            if (laps === null) failed = true;
+            lapsByDriver[d.code] = laps || [];
           }
         })
       );
@@ -50,12 +55,13 @@ export default function SpeedTraceChart({ driverIds }: Props) {
       }
       if (!cancelled) {
         setRows(merged);
+        setUnavailable(failed && merged.length === 0);
         setLoading(false);
       }
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ids, status]);
+  }, [ids, status, attempt]);
 
   const drivers = ids.map((id) => DRIVERS.find((d) => d.id === id)!).filter(Boolean);
 
@@ -64,6 +70,14 @@ export default function SpeedTraceChart({ driverIds }: Props) {
   }
   const session = getCurrentSessionInfo();
 
+  if (unavailable) {
+    return (
+      <div className="border border-dashed border-rule p-6 font-mono text-sm flex items-center justify-between gap-3 flex-wrap" role="status">
+        <span>Lap data unavailable. Retrying in a minute.</span>
+        <button onClick={() => setAttempt((n) => n + 1)} className="bg-paper-3 border border-rule px-3 py-1.5 text-xs btn-press hover:border-ink">RETRY NOW</button>
+      </div>
+    );
+  }
   if (!rows.length) {
     return (
       <div className="border border-dashed border-rule p-6 font-mono text-sm" role="status">

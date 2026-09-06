@@ -23,7 +23,9 @@ export default function TelemetryDisplay() {
   const schedule = useSchedule();
   const { drivers, status: driversStatus } = useDrivers();
   const live = schedule.data ? findLiveSession(schedule.data, now) : null;
-  const last = schedule.data ? findLastFinishedSession(schedule.data, now) : null;
+  // Prefer the most recent finished session OpenF1 has a key for; a Jolpica-only
+  // session (not yet published upstream) has no lap feed to read.
+  const last = schedule.data ? findLastFinishedSession(schedule.data, now, true) : null;
   const liveKey = live?.session.sessionKey ?? null;
   const lastKey = last?.session.sessionKey ?? null;
 

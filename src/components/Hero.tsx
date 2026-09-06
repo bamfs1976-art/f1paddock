@@ -17,7 +17,7 @@ interface Props {
 export default function Hero({ weather }: Props) {
   const now = useNow(1000);
   const schedule = useSchedule();
-  const { drivers, status: standingsStatus } = useDrivers();
+  const { drivers, status: standingsStatus, snapshot } = useDrivers();
 
   const rounds = schedule.data;
   const live = rounds ? findLiveSession(rounds, now) : null;
@@ -115,6 +115,7 @@ export default function Hero({ weather }: Props) {
                   <span className="block text-ink-2 text-sm tabular-nums">
                     {leader.pts} pts{leaderGap !== null ? ` · +${leaderGap} on ${second?.code ?? 'P2'}` : ''}
                   </span>
+                  {snapshot && <span className="block label-mono mt-1">Snapshot from 3 May 2026 · live data unavailable</span>}
                 </>
               ) : (
                 <span className="text-ink-2">Standings unavailable</span>

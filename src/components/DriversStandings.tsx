@@ -124,11 +124,11 @@ export default function DriversStandings({ liveSync }: Props) {
         className="mb-3"
       />
 
-      <div className="border-2 border-ink bg-paper-2" role="table" aria-live="polite" aria-busy={loading}>
+      <div className="border-2 border-ink bg-paper-2" role="group" aria-label="Drivers' standings" aria-live="polite" aria-busy={loading}>
         <div className="grid grid-cols-[40px_30px_30px_4px_60px_1fr_60px_70px] sm:grid-cols-[50px_40px_40px_4px_70px_1fr_120px_80px] gap-2 px-3 py-2 border-b border-rule label-mono">
           <div>POS</div>
-          <div aria-label="Position change">Δ</div>
-          <div aria-label="Select for comparison"></div>
+          <div><span aria-hidden="true">Δ</span><span className="sr-only">Position change</span></div>
+          <div><span className="sr-only">Select for comparison</span></div>
           <div></div>
           <div>CODE</div>
           <div>DRIVER</div>

@@ -206,11 +206,11 @@ async function doSync(): Promise<LiveSyncState | null> {
   return state;
 }
 
-export async function getLapData(driverNumber: number): Promise<LapData[]> {
+/** Laps for one driver in the current session; null when the feed is unavailable. */
+export async function getLapData(driverNumber: number): Promise<LapData[] | null> {
   await refreshSession();
-  if (!cachedSessionKey) return [];
-  const data = await safeFetch<LapData[]>('laps', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
-  return data || [];
+  if (!cachedSessionKey) return null;
+  return safeFetch<LapData[]>('laps', `session_key=${cachedSessionKey}&driver_number=${driverNumber}`);
 }
 
 /**

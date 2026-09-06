@@ -21,13 +21,13 @@ export default function StatsRibbon() {
   ];
 
   return (
-    <div className="border-y-2 border-ink bg-paper-2 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-rule">
+    <section aria-label="Season at a glance" className="border-y-2 border-ink bg-paper-2 grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-rule">
       {stats.map((s) => (
         <div key={s.label} className="px-4 py-3">
           <div className="label-mono">{s.label}</div>
           <div className="font-mono font-bold text-base mt-1">{s.value}</div>
         </div>
       ))}
-    </div>
+    </section>
   );
 }

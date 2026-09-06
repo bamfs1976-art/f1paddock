@@ -14,7 +14,7 @@ export function fmtLocalTime(iso: string | number | Date): string {
 
 /** "Sunday 14:00 BST" in the visitor's zone. */
 export function fmtDayTime(iso: string | number | Date): string {
-  return dayTimeFmt.format(new Date(iso));
+  return dayTimeFmt.format(new Date(iso)).replace(/,\s*/, ' ');
 }
 
 /** "06 SEP" for calendar cards. Date-only strings are treated as local dates. */
