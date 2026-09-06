@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Star, GitCompare } from 'lucide-react';
+import { Star, GitCompare, Share2 } from 'lucide-react';
 import type { Driver, LiveSyncState } from '../types';
 import PositionChangeIndicator from './ui/PositionChangeIndicator';
 import SkeletonLoader from './ui/SkeletonLoader';
@@ -50,6 +50,28 @@ export default function DriversStandings({ liveSync }: Props) {
 
   const loading = status === 'loading';
 
+  // Share a plain-text summary: the share sheet where the browser has one,
+  // otherwise the clipboard. The text is built from the live standings.
+  const [shared, setShared] = useState<'idle' | 'copied' | 'shared' | 'failed'>('idle');
+  const share = async () => {
+    const top = drivers.slice(0, 3).map((d, i) => `${i + 1}. ${d.name.split(' ').slice(-1)[0]}`).join(' ');
+    const text = `F1 2026 after round ${round}: ${top}`;
+    const url = 'https://fromthepaddock.netlify.app/#drivers';
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: 'F1 Paddock Intelligence', text, url });
+        setShared('shared');
+      } else {
+        await navigator.clipboard.writeText(`${text} ${url}`);
+        setShared('copied');
+      }
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') return; // user closed the sheet
+      setShared('failed');
+    }
+    setTimeout(() => setShared('idle'), 2500);
+  };
+
   return (
     <section id="drivers" className="px-6 sm:px-10 py-10 scroll-mt-14" aria-labelledby="drivers-heading">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -67,6 +89,19 @@ export default function DriversStandings({ liveSync }: Props) {
             <p className="label-mono mt-2">AFTER ROUND {round} · ARROWS VERSUS ROUND {Math.max(1, round - 1)}</p>
           )}
         </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={share}
+            disabled={loading || snapshot}
+            className="bg-paper-2 border border-rule px-3 py-2 font-mono text-xs btn-press flex items-center gap-2 hover:border-ink disabled:opacity-50"
+            aria-label="Share the top three as text"
+          >
+            <Share2 size={14} aria-hidden="true" />
+            {shared === 'copied' ? 'COPIED' : shared === 'shared' ? 'SHARED' : shared === 'failed' ? 'COULD NOT SHARE' : 'SHARE'}
+          </button>
+          <span className="sr-only" role="status" aria-live="polite">
+            {shared === 'copied' ? 'Summary copied to clipboard' : shared === 'shared' ? 'Summary shared' : shared === 'failed' ? 'Sharing failed' : ''}
+          </span>
         {selected.length === 2 && (
           <button
             onClick={() => setShowCompare(true)}
@@ -77,6 +112,7 @@ export default function DriversStandings({ liveSync }: Props) {
             COMPARE ({selected.length})
           </button>
         )}
+        </div>
       </div>
 
       <DataNotice

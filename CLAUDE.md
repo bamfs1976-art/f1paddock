@@ -119,4 +119,5 @@ npx netlify dev     # Vite plus functions on http://localhost:8888
 npm run typecheck
 npm run build
 node scripts/verify-drivers.mjs
+node scripts/render-og.mjs   # regenerates public/og-image.png and the PNG icons (needs playwright-core)
 ```
