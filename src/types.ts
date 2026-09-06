@@ -71,7 +71,9 @@ export interface Stint {
   tyre_age_at_start?: number;
 }
 
-export interface NewsItem {
+// One generated analysis item. These are analysis grounded in standings and
+// results, never news: the model has no reporting source and must not quote.
+export interface AnalysisItem {
   id: number;
   kicker: string;
   headline: string;
@@ -108,7 +110,7 @@ export interface TickerItem {
 }
 
 export interface PaddockIntelData {
-  news: NewsItem[];
+  analysis: AnalysisItem[];
   paddockIntel: string;
   ticker: TickerItem[];
   racePreview?: {

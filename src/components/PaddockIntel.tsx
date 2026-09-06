@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RefreshCw } from 'lucide-react';
 import { fetchPaddockIntel } from '../services/aiService';
-import { NEWS } from '../constants';
-import type { PaddockIntelData, NewsItem } from '../types';
+import type { PaddockIntelData, AnalysisItem } from '../types';
 import SkeletonLoader from './ui/SkeletonLoader';
 
 const CACHE_KEY = 'f1_paddock_intel_cache';
@@ -39,9 +38,8 @@ export default function PaddockIntel() {
     setLoading(false);
   };
 
-  const news: NewsItem[] = data?.news || NEWS;
-  const intel = data?.paddockIntel ||
-    'McLaren leads both championships through the opening five rounds of 2026, with Norris and Verstappen separated by 13 points. The new aero regulations have produced the most varied qualifying order in a decade, and Ferrari is closing the development gap with a strong Spanish GP package incoming.';
+  const analysis: AnalysisItem[] = data?.analysis || [];
+  const intel = data?.paddockIntel || '';
   const racePreview = data?.racePreview;
 
   return (
@@ -64,8 +62,10 @@ export default function PaddockIntel() {
 
       <div className="border-l-2 border-racing pl-4 py-3 mb-6 bg-paper-2">
         <div className="label-mono mb-2">STRATEGIC INTELLIGENCE SUMMARY</div>
-        {loading ? <SkeletonLoader type="text" count={3} /> : (
+        {loading ? <SkeletonLoader type="text" count={3} /> : intel ? (
           <p className="font-serif italic text-base leading-relaxed">{intel}</p>
+        ) : (
+          <p className="label-mono text-ink-3">ANALYSIS UNAVAILABLE</p>
         )}
       </div>
 
@@ -80,6 +80,7 @@ export default function PaddockIntel() {
         </div>
       )}
 
+      <div className="label-mono mb-3">ANALYSIS · GENERATED FROM STANDINGS AND RESULTS, NOT NEWS</div>
       <div className="grid gap-4 md:grid-cols-2">
         {loading
           ? Array.from({ length: 5 }).map((_, i) => (
@@ -89,7 +90,7 @@ export default function PaddockIntel() {
                 <SkeletonLoader type="text" count={3} />
               </article>
             ))
-          : news.map((item) => {
+          : analysis.map((item) => {
               const isOpen = expanded === item.id;
               const lead = item.type === 'lead';
               return (

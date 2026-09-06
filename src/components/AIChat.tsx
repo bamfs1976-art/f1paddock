@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, MessageSquare } from 'lucide-react';
-import { sendChatMessage } from '../services/aiService';
+import { sendChatMessage, RateLimitError } from '../services/aiService';
 import type { ChatMessage } from '../types';
 
 interface Props {
@@ -55,8 +55,8 @@ export default function AIChat({ open, onOpen, onClose, fullScreen }: Props) {
         setError('Something went wrong. Please try again.');
       }
     } catch (e) {
-      const msg = (e as Error).message === 'RATE_LIMITED'
-        ? 'Paddock AI is busy. Try again in a moment.'
+      const msg = e instanceof RateLimitError
+        ? e.message
         : 'Something went wrong. Please try again.';
       setError(msg);
     } finally {

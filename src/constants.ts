@@ -1,4 +1,4 @@
-import type { Driver, Team, Race, NewsItem } from './types';
+import type { Driver, Team, Race } from './types';
 
 export const TEAM_COLORS: Record<string, string> = {
   'Mercedes': '#27F4D2',
@@ -197,14 +197,6 @@ export const CALENDAR: Race[] = [
 // UI labels them with this date.
 export const SNAPSHOT_DATE = '2026-05-03';
 export const SNAPSHOT_LABEL = 'Snapshot from 3 May 2026';
-
-export const NEWS: NewsItem[] = [
-  { id: 1, kicker: 'CHAMPIONSHIP', headline: 'Antonelli leads after Suzuka — youngest leader in F1 history', body: 'Andrea Kimi Antonelli, 19, has become the youngest driver ever to lead the Formula 1 World Championship. Two consecutive wins in China and Japan, both from pole, and a 7-point cushion over team-mate George Russell. Mercedes have built the dominant car of the new regulation era and the rookie generation is delivering on every promise.', type: 'lead' },
-  { id: 2, kicker: 'STRATEGY', headline: 'Mercedes have a 45-point cushion in the constructors\' fight', body: 'Three races, three wins, both drivers in the top two. The W17 is the most efficient deployment of the new 350kW MGU-K and the team is converting that into pace and reliability. Ferrari are 45 points back; McLaren are a distant third on 61.' },
-  { id: 3, kicker: 'PADDOCK', headline: 'Verstappen and Norris stuck in the wrong half of the points', body: 'The four-time champion sits ninth on 16 points after a tough triple-header. Reigning champion Norris is fifth on 33. Neither McLaren nor Red Bull has solved the new aero / power-unit balance the way Mercedes and Ferrari have.' },
-  { id: 4, kicker: 'TECHNICAL', headline: 'The MGU-K Hybrid+ is reshaping race strategy', body: 'The retirement of the MGU-H and the move to a 50/50 power split has changed the calculus on energy deployment. Mercedes have the most efficient deployment software in the field and the lap-time advantage shows on tracks with long acceleration phases.' },
-  { id: 5, kicker: 'DRIVER', headline: 'Bearman bounces back from a 50G crash to score in Miami', body: 'A heavy accident at Suzuka briefly threatened his weekend but the Briton bounced back, scored points in Miami sprint and now sits seventh in the championship. Haas have built the surprise package of 2026.' },
-];
 
 // Driver identity. DRIVER_NUMBER_MAP (OpenF1 car number to app id) and
 // DRIVER_CODE_MAP (Jolpica three-letter code to app id) are the only places
