@@ -1,5 +1,12 @@
 # F1 Paddock Intelligence
 
+> **Moved.** This app now lives in the
+> [raceweekedge](https://github.com/bamfs1976-art/raceweekedge) repository
+> alongside Grid Edge, with its full history, so there is one app to deploy.
+> Paddock is served at `/` and Grid Edge at `/edge/` on the same Netlify site.
+> Make changes there. This repository is kept for reference only.
+
+
 A premium Formula 1 dashboard built with React 19, TypeScript, Vite 6 and Tailwind CSS 4.
 Live OpenF1 telemetry, AI-powered analysis via Anthropic Claude, and Supabase user preferences.
 
